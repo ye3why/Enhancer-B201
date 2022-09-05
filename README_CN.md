@@ -141,7 +141,7 @@ docker build -t enhancer-b201 docker/
 
 - 加载docker镜像
 
-下载镜像[百度云]()
+下载镜像 [百度云](https://pan.baidu.com/s/1R7n6PrInY8rUHBml5Eamvg) 提取码：tmlw
 
 加载镜像
 ```bash
