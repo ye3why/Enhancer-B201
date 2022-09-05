@@ -46,11 +46,11 @@ def parse(opt_path):
     opt['video_path'] = [Path(i).expanduser() for i in opt['video_path']]
     opt['output_dir'] = Path(opt['output_dir']).expanduser()
 
-    if not opt['models']:
+    if 'models' not in opt:
         opt['models'] = {}
-    if not opt['vfs']:
+    if 'vfs' not in opt:
         opt['vfs'] = {'null': ''}
-    if not opt['debug']:
+    if 'debug' not in opt:
         opt['debug'] = False
 
     # for compatibility
