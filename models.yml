@@ -1,0 +1,333 @@
+Default:
+    dataset_class: ImageDataset
+    nframes: 1
+    chopable: false
+    need_pad: false
+    multi_output: false
+    model_scale: 1
+    saveimg_function: sdr
+    aux_input: {}
+
+######################### Video Super-Resolution models ######################
+BasicVSR_ds_x2:
+    class: BasicVSR_ds
+    modelargs:
+      num_feat: 64
+      num_block: 15
+      ds_factor: 2
+      scale: 2
+    pretrain: ./weights/BasicVSR_ds_x2_weights.pt
+    dataset_class: VideoMinMoutDataset
+    nframes: 10
+    chopable: true
+    multi_output: true
+    need_pad: 4
+    model_scale: 2
+
+RealBasicVSR_x4:
+    class: RealBasicVSRNet
+    modelargs:
+      mid_channels: 64
+      num_propagation_blocks: 20
+      num_cleaning_blocks: 20
+      dynamic_refine_thres: 255
+      spynet_pretrained: None
+      is_fix_cleaning: False
+      is_sequential_cleaning: true
+    pretrain: ./weights/RealBasicVSR_x4.pth
+    dataset_class: VideoMinMoutDataset
+    nframes: 10
+    chopable: true
+    multi_output: true
+    need_pad: 4
+    model_scale: 4
+
+VRTx4_bd:
+    class: VRT
+    modelargs:
+      upscale: 4
+      img_size: [8,64,64]
+      window_size: [8,8,8]
+      depths: [8,8,8,8,8,8,8, 4,4,4,4, 4,4]
+      indep_reconsts: [11,12]
+      embed_dims: [120,120,120,120,120,120,120, 180,180,180,180, 180,180]
+      num_heads: [6,6,6,6,6,6,6, 6,6,6,6, 6,6]
+      pa_frames: 4
+      deformable_groups: 16
+    pretrain: ./weights/004_VRT_videosr_bd_Vimeo_7frames.pth
+    dataset_class: VideoMinMoutDataset
+    nframes: 6
+    chopable: true
+    multi_output: true
+    need_pad: 8
+    model_scale: 4
+
+SRx2:
+    # 2x SR
+    # pytorch == 1.10,  compiled deformable convolution
+    class: EDVR
+    modelargs:
+        nf: 64
+        nframes: 5
+        groups: 8
+        front_RBs: 5
+        back_RBs: 20
+        scale: 2
+        center: ~
+        ds_factor: 2
+    pretrain: ./weights/edvr_x2_ds_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+    chopable: true
+    need_pad: 4
+    model_scale: 2
+
+SRx3:
+    # 3x SR
+    # pytorch == 1.10,  compiled deformable convolution
+    class: RealVideoNet
+    modelargs:
+        nf: 96
+        nframes: 5
+        groups: 8
+        front_RBs: 5
+        RFAs: 4
+        scale: 3
+        ds_factor: 2
+        hr_conv: true
+    pretrain: ./weights/x3_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+    chopable: true
+    need_pad: 4
+    model_scale: 3
+
+SRx4:
+    # 4x SR
+    # pytorch == 1.10,  compiled deformable convolution
+    class: RealVideoNet
+    modelargs:
+        nf: 96
+        nframes: 5
+        groups: 8
+        front_RBs: 5
+        RFAs: 4
+        scale: 4
+        ds_factor: 2
+        hr_conv: true
+    pretrain: ./weights/x4_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+    chopable: true
+    need_pad: 4
+    model_scale: 4
+
+################### Single Image Super-Resolution models ######################
+
+EDSRx2:
+    class: EDSR
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        num_feat: 64
+        num_block: 16
+        upscale: 2
+        res_scale: 1
+        img_range: 255.
+        rgb_mean: [0.4488, 0.4371, 0.4040]
+    pretrain: ./weights/EDSR_Mx2_f64b16_DIV2K_official-3ba7b086.pth
+    dataset_class: ImageDataset
+    chopable: true
+    model_scale: 2
+
+RealESRGANx2:
+    class: RRDBNet
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        scale: 2
+        num_feat: 64
+        num_block: 23
+        num_grow_ch: 32
+    pretrain: ./weights/RealESRGAN_x2plus.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 2
+
+RealESRGANx4:
+    class: RRDBNet
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        scale: 4
+        num_feat: 64
+        num_block: 23
+        num_grow_ch: 32
+    pretrain: ./weights/RealESRGAN_x4plus.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 4
+
+####################### Degradation Removal models ###########################
+DeInterlace:
+    # remove video interlace
+    # pytorch > 1.7
+    class: MFDIN_DeInterlace
+    modelargs:
+      nf: 64
+      groups: 4
+      front_RBs: 5
+      back_RFAs: 2
+      center: ~
+      nfields: 5
+    pretrain: ./weights/mfdin_2x_2p_weights.pth
+    dataset_class: VideoDataset
+    nframes: 3
+    chopable: true
+    need_pad: 4
+    model_scale: 1
+
+MFDIN_2X:
+    # remove video interlace and 2x SR
+    # pytorch > 1.7
+    class: MFDIN_2X
+    modelargs:
+      nf: 64
+      groups: 4
+      front_RBs: 5
+      back_RFAs: 2
+      center: ~
+      nfields: 5
+    pretrain: ./weights/mfdin_2x_2p_weights.pth
+    dataset_class: VideoDataset
+    nframes: 3
+    chopable: true
+    need_pad: 4
+    model_scale: 2
+
+MFDIN_2P:
+    # remove video interlace and 2x video frame interpolate
+    # pytorch > 1.7
+    class: MFDIN_2P
+    modelargs:
+      nf: 64
+      groups: 4
+      front_RBs: 5
+      back_RFAs: 2
+      center: ~
+      nfields: 5
+    pretrain: ./weights/mfdin_2x_2p_weights.pth
+    dataset_class: FrameInterpDataset
+    multi_output: true
+    nframes: 3
+    chopable: true
+    need_pad: 4
+    model_scale: 1
+
+MFDIN_2X2P:
+    # full MFDIN, see https://github.com/anymyb/MFDIN
+    # pytorch > 1.7
+    # remove video interlace, 2x SR and 2x video frame interpolate
+    class: MFDIN_2X2P
+    modelargs:
+      nf: 64
+      groups: 4
+      front_RBs: 5
+      back_RFAs: 2
+      center: ~
+      nfields: 5
+    pretrain: ./weights/mfdin_2x_2p_weights.pth
+    dataset_class: FrameInterpDataset
+    multi_output: true
+    nframes: 3
+    chopable: true
+    need_pad: 4
+    model_scale: 2
+
+ChromaticCorrect:
+    # correct chromatic abberation
+    class: RRDBNet
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        scale: 1
+        num_feat: 64
+        num_block: 23
+        num_grow_ch: 32
+    pretrain: ./weights/chromaticcorrect.pth
+    dataset_class: ImageDataset
+    nframes: 1
+    need_pad: 4
+
+CAR:
+    # remove compression artifacts
+    class: LightCACnn
+    modelargs:
+        num_feat: 64
+        num_block: 6
+    pretrain: ./weights/light_ca_cnn_0711_weights.pth
+    dataset_class: ImageDataset
+    nframes: 1
+
+
+Descratch_bw:
+    class: DescratchNet
+    modelargs:
+        n_feats: 32
+        n_frames: 3
+    pretrain: ./weights/descratch_bw_weights.pt
+    dataset_class: VideoDataset
+    nframes: 3
+
+Descratch_white:
+    class: DescratchNet
+    modelargs:
+        n_feats: 32
+        n_frames: 3
+    pretrain: ./weights/descratch_w_weights.pt
+    dataset_class: VideoDataset
+    nframes: 3
+
+Denoise_low:
+    class: DenoiseNet
+    modelargs:
+        num_input_frames: 5
+        noise_std: 10
+    pretrain: ./weights/denoise_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+
+Denoise_medium:
+    class: DenoiseNet
+    modelargs:
+        num_input_frames: 5
+        noise_std: 20
+    pretrain: ./weights/denoise_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+
+Denoise_high:
+    class: DenoiseNet
+    modelargs:
+        num_input_frames: 5
+        noise_std: 30
+    pretrain: ./weights/denoise_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+
+
+################################## HDR ####################################
+HLG:
+    # sdr to hdr(hlg)
+    class: LEBDE
+    modelargs:
+        planes: 32
+    pretrain: ./weights/HLG_weights.pt
+    dataset_class: ImageDataset
+    saveimg_function: hlg
+    nframes: 1
+

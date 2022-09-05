@@ -1,0 +1,39 @@
+# general settings
+video_path:
+    - demo/Youku_00565_h_GT.mp4
+output_dir: demo/result
+
+batch_size_per_gpu: 1
+chop_forward: true
+chop_threshold: 160000
+
+use_tmpfile_png: true
+use_tmpfile_split: true
+keep_split_res: false
+keep_png: false
+debug: false
+
+ # [auto, hls, segment] hevc,h264: hls, others: segment
+segment_method: auto
+
+# models used to process input in sequence
+# definitions in models.yml
+models:
+    - EDSRx2
+
+# video specifications
+video_spec:
+    ext: .mov
+    fps: &fps 50
+    bitrate: 50M
+    output_kwargs:
+        vcodec: libx265
+        colorspace: bt709
+        pix_fmt: yuv420p
+
+# ffmpeg video filters
+vfs:
+    unsharp: '3:3:1'
+    fps: *fps
+    #scale: '3840x2160'
+    #sar_dar: 'setsar=16/15,setdar=4/3'
