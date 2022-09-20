@@ -22,6 +22,9 @@ from registry import DATASET_REGISTRY
 from registry import SAVEIMG_REGISTRY
 
 def loadmodel(sr_model, sr_pretrain, NGPUs):
+    if not sr_pretrain:
+        print('No pretrained weights provided.')
+        return sr_model
     weights = torch.load(sr_pretrain)
     if 'params' in weights.keys():
         weights = weights['params']

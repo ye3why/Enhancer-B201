@@ -8,6 +8,15 @@ Default:
     saveimg_function: sdr
     aux_input: {}
 
+Bicubic1/2:
+    # remove compression artifacts
+    class: Bicubic
+    modelargs:
+      scale_factor: 0.5
+    pretrain: ~
+    dataset_class: ImageDataset
+    nframes: 1
+
 ######################### Video Super-Resolution models ######################
 BasicVSR_ds_x2:
     class: BasicVSR_ds
