@@ -58,6 +58,8 @@ def parse(opt_path):
         opt['use_tmpfile_png'] = opt['use_tmpfile']
     if 'use_tmpfile_split' not in opt:
         opt['use_tmpfile_split'] = opt['use_tmpfile']
+    if 'ffmpeg_cmd' not in opt:
+        opt['ffmpeg_cmd'] = 'ffmpeg'
 
     opt['vf_str'] = ''
     for vf, vf_args in opt['vfs'].items():

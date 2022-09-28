@@ -43,12 +43,13 @@ def loadmodel(sr_model, sr_pretrain, NGPUs):
 def postprocess(save_dir, input_dir, output_dir, video):
     vf_str = opt['vf_str']
     params = utils.get_ffmpeg_args(video)
-    frame_rate, pix_fmt, bit_rate = params['r'], params['pix_fmt'], params['b:v']
+    # frame_rate, pix_fmt, bit_rate = params['r'], params['pix_fmt'], params['b:v']
     input_dir_path = Path(input_dir.name) if opt['use_tmpfile_png'] else input_dir
     try:
         (
             ffmpeg
-            .input(str(input_dir_path.joinpath('%d.png')), r=frame_rate)
+            # .input(str(input_dir_path.joinpath('%d.png')), r=frame_rate)
+            .input(str(input_dir_path.joinpath('%d.png')), r=opt['video_spec']['fps'])
             .output(str(output_dir.joinpath(video.name)),
                     vf=vf_str,
                     # pix_fmt=opt['video_spec']['pix_fmt'],
@@ -56,7 +57,7 @@ def postprocess(save_dir, input_dir, output_dir, video):
                     # vcodec=opt['video_spec']['vcodec'],
                     video_bitrate=opt['video_spec']['bitrate'],
                     **opt['video_spec']['output_kwargs'])
-            .run(quiet=ffmpeg_quiet, overwrite_output=True)
+            .run(quiet=ffmpeg_quiet, overwrite_output=True, cmd=ffmpeg_cmd)
         )
     except ffmpeg.Error as e:
         print(e.stderr.decode())
@@ -129,6 +130,7 @@ if __name__ == '__main__':
 
 
     ffmpeg_quiet = not opt['debug']
+    ffmpeg_cmd = opt['ffmpeg_cmd']
 
     videos_orig = []
     for vp in opt['video_path']:
@@ -196,7 +198,7 @@ if __name__ == '__main__':
                     .input(str(video), vsync=0)
                     .output(str(split_dir.joinpath('{}_{}'.format(video.stem, '.m3u8'))),
                             c='copy', hls_time='15', f='hls')
-                    .run(quiet=ffmpeg_quiet)
+                    .run(quiet=ffmpeg_quiet, cmd=ffmpeg_cmd)
                 )
             else:
                 (
@@ -205,7 +207,7 @@ if __name__ == '__main__':
                     .output(str(split_dir.joinpath('{}_%04d{}'.format(video.stem, '.mov'))),
                             map='v:0', c='copy', segment_time='00:00:15',
                             f='segment')
-                    .run(quiet=ffmpeg_quiet)
+                    .run(quiet=ffmpeg_quiet, cmd=ffmpeg_cmd)
                 )
         except ffmpeg.Error as e:
             print(e.stderr.decode())
@@ -295,7 +297,7 @@ if __name__ == '__main__':
                 (
                     ffmpeg
                     .output(audio_part, video_part, str(output_dir.joinpath(output_name)), c='copy')
-                    .run(quiet=ffmpeg_quiet)
+                    .run(quiet=ffmpeg_quiet, cmd=ffmpeg_cmd)
                 )
             except ffmpeg.Error as e:
                 print(e.stderr.decode())
@@ -306,7 +308,7 @@ if __name__ == '__main__':
                     ffmpeg
                     .input(str(split_list), f='concat', safe=0)
                     .output(str(output_dir.joinpath(output_name)), c='copy')
-                    .run(quiet=ffmpeg_quiet)
+                    .run(quiet=ffmpeg_quiet, cmd=ffmpeg_cmd)
                 )
             except ffmpeg.Error as e:
                 print(e.stderr.decode())

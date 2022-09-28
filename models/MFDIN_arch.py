@@ -265,7 +265,7 @@ class MFDIN_2X2P(nn.Module):
 @MODEL_REGISTRY.register()
 class MFDIN_2X(MFDIN_2X2P):
     def __init__(self, nf=64, groups=4, front_RBs=5, back_RFAs=2, center=None, nfields=5):
-        super(MFDIN_DeInterlace, self).__init__(nf, groups, front_RBs, back_RFAs, center, nfields)
+        super(MFDIN_2X, self).__init__(nf, groups, front_RBs, back_RFAs, center, nfields)
 
     def forward(self, x):
         out = super().forward(x)
@@ -275,7 +275,7 @@ class MFDIN_2X(MFDIN_2X2P):
 @MODEL_REGISTRY.register()
 class MFDIN_2P(MFDIN_2X2P):
     def __init__(self, nf=64, groups=4, front_RBs=5, back_RFAs=2, center=None, nfields=5):
-        super(MFDIN_DeInterlace, self).__init__(nf, groups, front_RBs, back_RFAs, center, nfields)
+        super(MFDIN_2P, self).__init__(nf, groups, front_RBs, back_RFAs, center, nfields)
 
     def forward(self, x):
         out = super().forward(x)

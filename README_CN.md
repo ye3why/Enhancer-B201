@@ -274,3 +274,10 @@ docker run --runtime nvidia -it --rm --ipc=host -v /本地数据目录:/data enh
 
     可在选项中设置debug: true输出详细的ffmpeg信息
 
+
+- 由于文件名包含空格导致ffmpeg报错
+    
+    替换文件名中的空格
+    
+    可以使用utils/renamefiles.py替换目录下所有文件名
+
