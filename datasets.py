@@ -17,8 +17,9 @@ class ImageDataset(data.Dataset):
     def __getitem__(self, idx):
         lr_path = self.img_path[idx]
         filename = lr_path.name
-        frame_idx = int(lr_path.stem)
-        img_path = lr_path.parent.joinpath('{}.png'.format(frame_idx))
+        img_path = lr_path
+        # frame_idx = int(lr_path.stem)
+        # img_path = lr_path.parent.joinpath('{}.png'.format(frame_idx))
         # lr = misc.imread(img_path)
         lr = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR|cv2.IMREAD_ANYDEPTH)
         lr = lr[:, :, [2, 1, 0]]

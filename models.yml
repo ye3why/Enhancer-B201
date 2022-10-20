@@ -17,6 +17,15 @@ Bicubic1/2:
     dataset_class: ImageDataset
     nframes: 1
 
+Bicubic1/4:
+    # remove compression artifacts
+    class: Bicubic
+    modelargs:
+      scale_factor: 0.25
+    pretrain: ~
+    dataset_class: ImageDataset
+    nframes: 1
+
 ######################### Video Super-Resolution models ######################
 BasicVSR_ds_x2:
     class: BasicVSR_ds
@@ -181,6 +190,74 @@ RealESRGANx4:
     nframes: 1
     model_scale: 4
 
+ESRGANx4:
+    class: RRDBESRGAN
+    modelargs:
+        in_nc: 3
+        out_nc: 3
+        nf: 64
+        nb: 23
+        gc: 32
+    pretrain: ./weights/RRDB_ESRGAN_x4.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 4
+
+SRx2img:
+    # 2x SR
+    # pytorch == 1.10,  compiled deformable convolution
+    class: EDVR_single
+    modelargs:
+        nf: 64
+        nframes: 5
+        groups: 8
+        front_RBs: 5
+        back_RBs: 20
+        scale: 2
+        center: ~
+        ds_factor: 2
+    pretrain: ./weights/edvr_x2_ds_weights.pt
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    model_scale: 2
+
+AnimeSRx4:
+    # from https://github.com/TencentARC/AnimeSR
+    class: AnimeSR
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        num_feat: 64
+        num_conv: 16
+        upscale: 4
+        act_type: 'prelu'
+    pretrain: ./weights/realesr-animevideov3.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 4
+
+
+AnimeSRx4_6b:
+    # from https://github.com/TencentARC/AnimeSR
+    class: AnimeSRRRDB
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        num_feat: 64
+        num_block: 6
+        upscale: 4
+        num_grow_ch: 32
+    pretrain: ./weights/RealESRGAN_x4plus_anime_6B.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 4
 ####################### Degradation Removal models ###########################
 DeInterlace:
     # remove video interlace
@@ -327,7 +404,6 @@ Denoise_high:
     pretrain: ./weights/denoise_weights.pt
     dataset_class: VideoDataset
     nframes: 5
-
 
 ################################## HDR ####################################
 HLG:

@@ -5,6 +5,7 @@ import ffmpeg
 import tempfile
 import cv2
 import os
+import os.path as osp
 import copy
 import shutil
 import argparse
@@ -23,7 +24,12 @@ from registry import DATASET_REGISTRY
 from registry import SAVEIMG_REGISTRY
 
 def loadmodel(sr_model, sr_pretrain, NGPUs):
+    if not sr_pretrain:
+        print('No pretrained weights provided.')
+        return sr_model
     weights = torch.load(sr_pretrain)
+    if 'params_ema' in weights.keys():
+        weights = weights['params_ema']
     if 'params' in weights.keys():
         weights = weights['params']
     weights_dict = OrderedDict()
@@ -56,7 +62,7 @@ def model_forward(model, model_conf, input_dir, save_dir):
                 filename = utils.flatten_list(filename)
             for i in range(sr.shape[0]):
                 t = threading.Thread(target=saveimg_function,
-                                    args=(sr[i], save_dir.joinpath(filename[i]))
+                                    args=(sr[i], osp.join(save_dir, filename[i]))
                                     )
                 threads.append(t)
                 t.start()
@@ -86,39 +92,66 @@ def model_forward_single(model, model_conf, input_dir, save_dir):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model_name', type=str, required=True, help='choose a model name from models.yml')
+    parser.add_argument('-m', '--model_list', type=str, required=True, nargs='+', help='choose models from models.yml')
     parser.add_argument('-i', '--input_path', type=str, required=True, help='img path or imgs dir')
     parser.add_argument('-o', '--output_dir', type=str, required=True, help='output dir')
     parser.add_argument('--chop', action='store_true', help='use chop forward')
+    parser.add_argument('--not_usetmp', action='store_false', help='not use tempfile')
     parser.add_argument('--NGPUs', type=int, default=1, help='the number of gpus')
     parser.add_argument('--models_conf', type=str, default='./models.yml', help='Path to models config Yaml file.')
     args = parser.parse_args()
     input_path = Path(args.input_path)
     output_dir = Path(args.output_dir)
-    single_img =  output_dir.suffix in ['.jpg', '.bmp', '.png', '.tiff']
-    if not single_img and not output_dir.exists():
-        output_dir.mkdir()
-    models_conf = options.parse_modelsconf(args.models_conf)
+    single_img =  input_path.suffix in ['.jpg', '.bmp', '.png', '.tiff']
+    if single_img:
+        assert not output_dir.joinpath(input_path.name).exists(), f'{input_path.name} already in {output_dir}'
+        if output_dir.suffix in ['.jpg', '.bmp', '.png', '.tiff']:
+            assert not output_dir.exists(), f'{output_dir} already exists!'
 
-    m = copy.deepcopy(models_conf[args.model_name])
-    models_module.import_model(m['class'])  # import model class as need
-    m['net'] = MODEL_REGISTRY.get(m['class'])(**m['modelargs'])
-    m['net'] = loadmodel(m['net'], m['pretrain'], args.NGPUs)
-    m['dataset'] = DATASET_REGISTRY.get(m['dataset_class'])
+    else:
+        assert not output_dir.exists(), f'Output path {output_dir} exists!'
+    # if not single_img and not output_dir.exists():
+        # output_dir.mkdir()
 
-    scale = m.get('model_scale', 1)
-    if m.get('need_pad'):
-        m['net'] = functools.partial(utils.forward_pad, forward_function=m['net'],
-                                        scale=scale, times=m['need_pad'])
-    if args.chop and m.get('chopable'):
-        m['net'] = functools.partial(utils.forward_chop, forward_function=m['net'],
-                                        scale=scale, n_GPUs=args.NGPUs,
-                                        multi_output=m['multi_output'], min_size=160000)
-
-    saveimg_function = SAVEIMG_REGISTRY.get(m['saveimg_function'])
+    input_dir = tempfile.TemporaryDirectory()
     if input_path.is_dir():
-        model_forward(m['net'], m, input_path, output_dir)
+        shutil.rmtree(input_dir.name)
+        shutil.copytree(input_path, input_dir.name)
     elif input_path.is_file():
-        model_forward_single(m['net'], m, input_path, output_dir)
+        shutil.copy(input_path, input_dir.name)
     else:
         print('Error: input_path is not a file or a directory.')
+
+    models_conf = options.parse_modelsconf(args.models_conf)
+    for m_idx in range(len(args.model_list)):
+        model_name = args.model_list[m_idx]
+        m = copy.deepcopy(models_conf[model_name])
+        models_module.import_model(m['class'])  # import model class as need
+        m['net'] = MODEL_REGISTRY.get(m['class'])(**m['modelargs'])
+        m['net'] = loadmodel(m['net'], m['pretrain'], args.NGPUs)
+        m['dataset'] = DATASET_REGISTRY.get(m['dataset_class'])
+
+        scale = m.get('model_scale', 1)
+        if m.get('need_pad'):
+            m['net'] = functools.partial(utils.forward_pad, forward_function=m['net'],
+                                            scale=scale, times=m['need_pad'])
+        if args.chop and m.get('chopable'):
+            m['net'] = functools.partial(utils.forward_chop, forward_function=m['net'],
+                                            scale=scale, n_GPUs=args.NGPUs,
+                                            multi_output=m['multi_output'], min_size=160000)
+
+        saveimg_function = SAVEIMG_REGISTRY.get(m['saveimg_function'])
+        save_dir = tempfile.TemporaryDirectory()
+        print(f'Using model: {model_name}')
+        model_forward(m['net'], m, input_dir.name, save_dir.name)
+        input_dir.cleanup()
+        input_dir = save_dir
+
+    if input_path.is_dir():
+        # model_forward(m['net'], m, input_dir, save_dir)
+        shutil.copytree(input_dir.name, output_dir)
+    elif input_path.is_file():
+        shutil.copy(osp.join(input_dir.name, osp.basename(input_path)), output_dir)
+        # model_forward_single(m['net'], m, input_dir, save_dir)
+    input_dir.cleanup()
+    print('Done.')

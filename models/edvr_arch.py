@@ -467,3 +467,27 @@ class EDVR(nn.Module):
         base = F.interpolate(x_center, scale_factor=2, mode='bilinear', align_corners=False)
         out += base
         return out
+
+
+@MODEL_REGISTRY.register()
+class EDVR_single(EDVR):
+    '''
+        support single image forward
+    '''
+    def __init__(self,
+                 nf=64,
+                 nframes=5,
+                 groups=8,
+                 front_RBs=5,
+                 back_RBs=10,
+                 scale=4,
+                 center=None,
+                 ds_factor=2
+                 ):
+        super(EDVR_single, self).__init__(nf, nframes, groups, front_RBs, back_RBs, scale, center, ds_factor)
+        self.nframes = nframes
+
+
+    def forward(self, x):
+        x = x.unsqueeze(1).repeat(1, self.nframes, 1, 1, 1)
+        return super().forward(x)

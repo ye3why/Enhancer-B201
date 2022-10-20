@@ -26,6 +26,8 @@ def loadmodel(sr_model, sr_pretrain, NGPUs):
         print('No pretrained weights provided.')
         return sr_model
     weights = torch.load(sr_pretrain)
+    if 'params_ema' in weights.keys():
+        weights = weights['params_ema']
     if 'params' in weights.keys():
         weights = weights['params']
     weights_dict = OrderedDict()
