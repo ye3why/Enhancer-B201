@@ -2,15 +2,25 @@ import torch
 import torch.utils.data as data
 import torchvision
 import cv2
+import re
 import scipy.misc as misc
 from pathlib import Path
 from registry import DATASET_REGISTRY
+
+def glob_pic(dirname):
+    pics = []
+    for x in Path(dirname).glob('*'):
+        p = re.search('.*\.(jpe?g|png|bmp|tif)$', str(x), flags=re.IGNORECASE)
+        if p is not None:
+            pics.append(Path(p.group()))
+    return pics
 
 @DATASET_REGISTRY.register()
 class ImageDataset(data.Dataset):
     def __init__(self, video_dir, n_frames):
         super(ImageDataset, self).__init__()
-        self.img_path = list(Path(video_dir).glob('*.png'))
+        # self.img_path = list(Path(video_dir).glob('*.png'))
+        self.img_path = glob_pic(video_dir)
         self.video_len = len(self.img_path)
         self.transformer = torchvision.transforms.ToTensor()
 
@@ -35,7 +45,8 @@ class VideoDataset(data.Dataset):
     def __init__(self, video_dir, n_frames):
         super(VideoDataset, self).__init__()
         self.n_frames = n_frames
-        self.img_path = list(Path(video_dir).glob('*.png'))
+        # self.img_path = list(Path(video_dir).glob('*.png'))
+        self.img_path = glob_pic(video_dir)
         self.video_len = len(self.img_path)
         self.video_idx_lower_bound = min([int(img.stem) for img in self.img_path])
         self.video_idx_upper_bound = max([int(img.stem) for img in self.img_path])
@@ -114,7 +125,8 @@ class VideoMinMoutDataset(data.Dataset):
     def __init__(self, video_dir, n_frames):
         super(VideoMinMoutDataset, self).__init__()
         self.n_frames = n_frames
-        self.img_path = list(Path(video_dir).glob('*.png'))
+        # self.img_path = list(Path(video_dir).glob('*.png'))
+        self.img_path = glob_pic(video_dir)
         self.clip_idx = list(range(0, len(self.img_path), n_frames))
         self.transformer = torchvision.transforms.ToTensor()
 

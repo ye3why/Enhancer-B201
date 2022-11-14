@@ -96,7 +96,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--input_path', type=str, required=True, help='img path or imgs dir')
     parser.add_argument('-o', '--output_dir', type=str, required=True, help='output dir')
     parser.add_argument('--chop', action='store_true', help='use chop forward')
-    parser.add_argument('--not_usetmp', action='store_false', help='not use tempfile')
+    # parser.add_argument('--not_usetmp', action='store_false', help='not use tempfile')
     parser.add_argument('--NGPUs', type=int, default=1, help='the number of gpus')
     parser.add_argument('--models_conf', type=str, default='./models.yml', help='Path to models config Yaml file.')
     args = parser.parse_args()
