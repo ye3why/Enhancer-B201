@@ -3,14 +3,40 @@ import cv2
 import ffmpeg
 import torch
 import torchvision
+import string
+import shutil
+import random
+import threading
+import time
+import tempfile
+import os
+from pathlib import Path
 from registry import SAVEIMG_REGISTRY
 
 def flatten_list(li):
     return sum(([x] if not isinstance(x, list) and not isinstance(x, tuple) else flatten_list(x) for x in li), [])
 
+def ifnot_mkdir(path):
+    if isinstance(path, Path):
+        if not path.exists():
+            path.mkdir()
+    elif isinstance(path, str):
+        if not os.path.exists(path):
+            os.mkdir(path)
+    else:
+        raise NotImplementedError
+
+def isImg(path):
+    return path.suffix in ['.jpg', '.bmp', '.png', '.tiff']
+
+
 @SAVEIMG_REGISTRY.register('sdr')
 def saveimg_sdr(img, path):
-    return torchvision.utils.save_image(img, path)
+    # torchvision.utils.save_image is very slow
+    # return torchvision.utils.save_image(img, path)
+    img = img.cpu().detach().clamp_(0, 1).numpy().transpose((1, 2, 0)) * 255
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    cv2.imwrite(str(path), img)
 
 def colortrans_709_2020(img, gamma):
     img = img**gamma
@@ -85,71 +111,70 @@ def input_cycle(x, target_n_frames):
     res = torch.cat(res, dim=0)
     return res[:, center_idx - half_n: center_idx + half_n + 1]
 
-def forward_pad(x, forward_function, scale, times=4):
-    multi_frame = len(x.size()) == 5
-    if multi_frame:
-        b,n,c,h,w = x.size()
+
+
+class ImgSaver(threading.Thread):
+
+    def __init__(self, save_func, que, qid):
+        super().__init__()
+        self._queue = que
+        self.qid = qid
+        self.save_func = save_func
+
+    def run(self):
+        while True:
+            msg = self._queue.get()
+            if isinstance(msg, str) and msg == 'quit':
+                break
+            self.save_func(msg['img'], msg['path'])
+        # print(f'{self.qid} quit.')
+
+
+def getTempdir(tempdir_type, opt=None):
+    if tempdir_type == 'mem':
+        return MemoryTempDir()
+    elif tempdir_type == 'disk':
+        return DiskTempDir(opt)
     else:
-        b,c,h,w = x.size()
-    h_n = int(times*np.ceil(h/times))
-    w_n = int(times*np.ceil(w/times))
-    if multi_frame:
-        imgs_temp = x.new_zeros(b,n,c,h_n,w_n)
-    else:
-        imgs_temp = x.new_zeros(b,c,h_n,w_n)
-    imgs_temp[..., :h, :w] = x
-    model_output = forward_function(imgs_temp)
-    output = model_output[..., :scale*h, :scale*w]
-    return output
+        raise NotImplementedError
+
+class MemoryTempDir():
+    def __init__(self):
+        self.handler = tempfile.TemporaryDirectory()
+        self.Path = Path(self.handler.name)
+        self.string = self.handler.name
+
+    def __del__(self):
+        self.handler.cleanup()
+
+    def __str__(self):
+        return self.string
+
+    def getPath(self):
+        return self.Path
+
+    def getstring(self):
+        return self.string
 
 
-def forward_chop(x, forward_function, scale, n_GPUs, multi_output=False, shave=10, min_size=None):
-    if not min_size:
-        min_size = 160000
-    n_GPUs = min(n_GPUs, 4)
-    multi_frame = len(x.size()) == 5
-    if multi_frame:
-        b, f, c, h, w = x.size()
-    else:
-        b, c, h, w = x.size()
-    h_half, w_half = h // 2, w // 2
-    h_size, w_size = h_half + shave, w_half + shave
-    lr_list = [
-        x[..., 0:h_size, 0:w_size],
-        x[..., 0:h_size, (w - w_size):w],
-        x[..., (h - h_size):h, 0:w_size],
-        x[..., (h - h_size):h, (w - w_size):w]]
 
-    if w_size * h_size < min_size:
-        sr_list = []
-        for i in range(0, 4, n_GPUs):
-            lr_batch = torch.cat(lr_list[i:(i + n_GPUs)], dim=0)
-            sr_batch = forward_function(lr_batch)
-            sr_list.extend(sr_batch.chunk(n_GPUs, dim=0))
-    else:
-        sr_list = [
-            forward_chop(patch, forward_function, scale, n_GPUs,
-                                shave=shave, min_size=min_size, multi_output=multi_output)
-            for patch in lr_list
-        ]
+class DiskTempDir():
+    def __init__(self, opt):
+        randomname = ''.join(random.sample(string.ascii_lowercase + string.ascii_uppercase + string.digits, 10))
+        self.handler = opt['output_dir'].joinpath('_'.join(['tmp', randomname]))
+        assert not self.handler.exists(), f'tempdir path: {self.handler.name} exists!'
+        self.handler.mkdir()
+        self.Path = self.handler
+        self.string = str(self.handler)
 
-    h, w = scale * h, scale * w
-    h_half, w_half = scale * h_half, scale * w_half
-    h_size, w_size = scale * h_size, scale * w_size
-    shave *= scale
+    def __del__(self):
+        shutil.rmtree(self.handler)
 
-    if multi_output:
-        output = x.new(b, f, c, h, w)
-    else:
-        output = x.new(b, c, h, w)
-    output[..., 0:h_half, 0:w_half] \
-        = sr_list[0][..., 0:h_half, 0:w_half]
-    output[..., 0:h_half, w_half:w] \
-        = sr_list[1][..., 0:h_half, (w_size - w + w_half):w_size]
-    output[..., h_half:h, 0:w_half] \
-        = sr_list[2][..., (h_size - h + h_half):h_size, 0:w_half]
-    output[..., h_half:h, w_half:w] \
-        = sr_list[3][..., (h_size - h + h_half):h_size, (w_size - w + w_half):w_size]
+    def __str__(self):
+        return self.string
 
-    return output
+    def getPath(self):
+        return self.Path
 
+    def getstring(self):
+        return self.string

@@ -1,19 +1,20 @@
 # general settings
-video_path:
+input_path:
     - ~/demo_video/test1.mp4
     - ~/demo_video/test2.mp4
     - ~/demo_video/
 output_dir: ~/demo_results/template/
 
+ffmpeg_cmd: ffmpeg
+num_imgsavers: 10
 batch_size_per_gpu: 1
 chop_forward: false
 chop_threshold: 160000
 
-# options for test
-use_tmpfile_png: true
-use_tmpfile_split: true
-keep_split_res: false
-keep_png: false
+# options
+tempdir_type: mem # mem or disk
+keep_clip_results: false
+keep_png_results: false
 debug: false
 
  # [auto, hls, segment] hevc,h264: hls, others: segment
@@ -48,7 +49,6 @@ models:
 # video specifications
 video_spec:
     ext: .mov
-    fps: &fps 50
     bitrate: 50M
     output_kwargs:
         vcodec: libx265
@@ -57,7 +57,6 @@ video_spec:
 
     # hlg
     #ext: .mov
-    #fps: &fps 50
     #bitrate: 50M
     #output_kwargs:
         #vcodec: libx265
@@ -66,7 +65,6 @@ video_spec:
 
     # prores 4444
     #ext: .mov
-    #fps: &fps 24
     #bitrate: 50M
     #output_kwargs:
         #vcodec: prores_ks
@@ -79,5 +77,5 @@ vfs:
     #scale: '3840x2160'
     #hqdn3d:
     #unsharp: '3:3:1'
-    #fps: *fps
+    #fps: 50
     #sar_dar: 'setsar=16/15,setdar=4/3'

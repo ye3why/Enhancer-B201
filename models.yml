@@ -1,12 +1,16 @@
 Default:
+    class:
+    modelargs: {}
+    pretrain: ~
     dataset_class: ImageDataset
     nframes: 1
     chopable: false
     need_pad: false
+    need_refresh: false
     multi_output: false
     model_scale: 1
+    frame_scale: 1
     saveimg_function: sdr
-    aux_input: {}
 
 Bicubic1/2:
     # remove compression artifacts
@@ -14,6 +18,7 @@ Bicubic1/2:
     modelargs:
       scale_factor: 0.5
     pretrain: ~
+    model_scale: 0.5
     dataset_class: ImageDataset
     nframes: 1
 
@@ -23,6 +28,7 @@ Bicubic1/4:
     modelargs:
       scale_factor: 0.25
     pretrain: ~
+    model_scale: 0.25
     dataset_class: ImageDataset
     nframes: 1
 
@@ -138,6 +144,36 @@ SRx4:
     nframes: 5
     chopable: true
     need_pad: 4
+    model_scale: 4
+
+AnimeSRv1x4:
+    # from https://github.com/TencentARC/AnimeSR
+    class: MSRSWVSR
+    modelargs:
+        num_feat: 64
+        num_block: [5, 3, 2]
+        netscale: 4
+    pretrain: ./weights/AnimeSR_v1-PaperModel.pth
+    dataset_class: VideoDataset
+    nframes: 3
+    chopable: true
+    need_pad: 4
+    need_refresh: true
+    model_scale: 4
+
+AnimeSRv2x4:
+    # from https://github.com/TencentARC/AnimeSR
+    class: MSRSWVSR
+    modelargs:
+        num_feat: 64
+        num_block: [5, 3, 2]
+        netscale: 4
+    pretrain: ./weights/AnimeSR_v2.pth
+    dataset_class: VideoDataset
+    nframes: 3
+    chopable: true
+    need_pad: 4
+    need_refresh: true
     model_scale: 4
 
 ################### Single Image Super-Resolution models ######################
@@ -274,7 +310,7 @@ DeInterlace:
     dataset_class: VideoDataset
     nframes: 3
     chopable: true
-    need_pad: 4
+    need_pad: 8
     model_scale: 1
 
 MFDIN_2X:
@@ -292,7 +328,7 @@ MFDIN_2X:
     dataset_class: VideoDataset
     nframes: 3
     chopable: true
-    need_pad: 4
+    need_pad: 8
     model_scale: 2
 
 MFDIN_2P:
@@ -311,8 +347,9 @@ MFDIN_2P:
     multi_output: true
     nframes: 3
     chopable: true
-    need_pad: 4
+    need_pad: 8
     model_scale: 1
+    frame_scale: 2
 
 MFDIN_2X2P:
     # full MFDIN, see https://github.com/anymyb/MFDIN
@@ -331,8 +368,9 @@ MFDIN_2X2P:
     multi_output: true
     nframes: 3
     chopable: true
-    need_pad: 4
+    need_pad: 8
     model_scale: 2
+    frame_scale: 2
 
 ChromaticCorrect:
     # correct chromatic abberation

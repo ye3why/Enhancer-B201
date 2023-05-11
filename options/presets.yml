@@ -1,0 +1,58 @@
+# general settings
+ffmpeg_cmd: ffmpeg
+models_conf: ./models.yml
+batch_size_per_gpu: 1
+num_imgsavers: 10
+chop_forward: false
+chop_threshold: 160000
+
+# options for test
+tempdir_type: mem # mem or disk
+keep_clip_results: false
+keep_png_results: false
+debug: false
+
+ # [auto, hls, segment] hevc,h264: hls, others: segment
+segment_method: auto
+
+models: {}
+
+
+# ffmpeg video filters
+vfs: {}
+
+# video specifications
+presets:
+    h264:
+        ext: .mov
+        bitrate: 50M
+        output_kwargs:
+            vcodec: h264
+            colorspace: bt709
+            pix_fmt: yuv420p
+
+    x265:
+        ext: .mov
+        bitrate: 50M
+        output_kwargs:
+            vcodec: libx265
+            colorspace: bt709
+            pix_fmt: yuv420p
+
+    hlg:
+        ext: .mov
+        bitrate: 50M
+        output_kwargs:
+            vcodec: libx265
+            pix_fmt: yuv420p10le
+            x265-params: 'colormatrix=bt2020nc:transfer=arib-std-b67:colorprim=bt2020:pools=36'
+
+    prores:
+        ext: .mov
+        bitrate: 50M
+        output_kwargs:
+            vcodec: prores_ks
+            colorspace: bt709
+            pix_fmt: yuv444p10le
+            'profile:v': 4
+

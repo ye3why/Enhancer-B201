@@ -46,21 +46,23 @@ class VideoDataset(data.Dataset):
         super(VideoDataset, self).__init__()
         self.n_frames = n_frames
         # self.img_path = list(Path(video_dir).glob('*.png'))
-        self.img_path = glob_pic(video_dir)
+        self.img_path = sorted(glob_pic(video_dir))
         self.video_len = len(self.img_path)
-        self.video_idx_lower_bound = min([int(img.stem) for img in self.img_path])
-        self.video_idx_upper_bound = max([int(img.stem) for img in self.img_path])
+        # self.video_idx_lower_bound = min([int(img.stem) for img in self.img_path])
+        # self.video_idx_upper_bound = max([int(img.stem) for img in self.img_path])
         self.transformer = torchvision.transforms.ToTensor()
 
     def __getitem__(self, idx):
         lr_path = self.img_path[idx]
         filename = lr_path.name
-        frame_idx = int(lr_path.stem)
-        idxs = self.index_generation(
-            frame_idx, self.video_idx_upper_bound, self.n_frames, self.video_idx_lower_bound)
+        # frame_idx = int(lr_path.stem)
+        # idxs = self.index_generation(
+            # frame_idx, self.video_idx_upper_bound, self.n_frames, self.video_idx_lower_bound)
+        idxs = self.index_generation(idx, self.video_len - 1, self.n_frames, 0)
         lrs = []
-        for idx in idxs:
-            img_path = lr_path.parent.joinpath('{}.png'.format(idx))
+        for neighbor_idx in idxs:
+            img_path = self.img_path[neighbor_idx]
+            # img_path = lr_path.parent.joinpath('{}.png'.format(idx))
             # temp = misc.imread(img_path)
             temp = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR|cv2.IMREAD_ANYDEPTH)
             temp = temp[:, :, [2, 1, 0]]
@@ -100,13 +102,12 @@ class FrameInterpDataset(VideoDataset):
     def __getitem__(self, idx):
         lr_path = self.img_path[idx]
         stem, suffix = lr_path.stem, lr_path.suffix
-        filename = [str(int(stem)*2-1) + suffix, str(int(stem)*2) + suffix]
-        frame_idx = int(lr_path.stem)
-        idxs = self.index_generation(
-            frame_idx, self.video_idx_upper_bound, self.n_frames, self.video_idx_lower_bound)
+        # filename = [str(int(stem)*2-1) + suffix, str(int(stem)*2) + suffix]
+        filename = ['{:>08d}'.format(int(stem)*2-1) + suffix, '{:>08d}'.format(int(stem)*2) + suffix]
+        idxs = self.index_generation(idx, self.video_len - 1, self.n_frames, 0)
         lrs = []
-        for idx in idxs:
-            img_path = lr_path.parent.joinpath('{}.png'.format(idx))
+        for neighbor_idx in idxs:
+            img_path = self.img_path[neighbor_idx]
             # temp = misc.imread(img_path)
             temp = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR|cv2.IMREAD_ANYDEPTH)
             temp = temp[:, :, [2, 1, 0]]
@@ -126,7 +127,7 @@ class VideoMinMoutDataset(data.Dataset):
         super(VideoMinMoutDataset, self).__init__()
         self.n_frames = n_frames
         # self.img_path = list(Path(video_dir).glob('*.png'))
-        self.img_path = glob_pic(video_dir)
+        self.img_path = sorted(glob_pic(video_dir))
         self.clip_idx = list(range(0, len(self.img_path), n_frames))
         self.transformer = torchvision.transforms.ToTensor()
 
