@@ -1,6 +1,6 @@
 # general settings
 ffmpeg_cmd: ffmpeg
-models_conf: ./models.yml
+models_conf: ./code/settings/models.yml
 batch_size_per_gpu: 1
 num_imgsavers: 10
 chop_forward: false

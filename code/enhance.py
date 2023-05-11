@@ -2,13 +2,14 @@ import threading
 import ffmpeg
 import shutil
 import argparse
-import queue
 import time
 from pathlib import Path
 
+import datasets
+import save_func
 import options
 import utils
-from model_utils import  prepare_model, sequential_forward
+from model_process import prepare_model, sequential_forward
 
 
 def main():
@@ -23,7 +24,7 @@ def main():
 
     utils.ifnot_mkdir(opt['output_dir'])
 
-    print(f'Options:\n', options.dict2str(opt))
+    print(f'Options:\n', utils.dict2str(opt))
 
     # process unprocessed videos
     for idx, video_path in enumerate(unprocessed_videos):

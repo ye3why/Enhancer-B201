@@ -4,6 +4,6 @@
 # CUDA_HOME=/usr/local/cuda-10.0 \
 # CUDNN_INCLUDE_DIR=/usr/local/cuda-10.0/include \
 # CUDNN_LIB_DIR=/usr/local/cuda-10.0/lib64 \
-cd  models/DCNv2
+cd  code/models/DCNv2
 python setup.py build develop
-cd ../..
+cd ../../..

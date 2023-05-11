@@ -1,24 +1,20 @@
-import threading
-import ffmpeg
 import shutil
 import argparse
-import queue
-import time
 import yaml
 from tqdm import tqdm
-from pathlib import Path
 
 import datasets
+import save_func
 import options
 import utils
-from model_utils import  prepare_model, sequential_forward
+from model_process import prepare_model, sequential_forward
 
 def main():
     opt, models_conf = parseargs()
 
     prepared_models = prepare_model(opt, models_conf)
 
-    print(f'Options:\n', options.dict2str(opt))
+    print(f'Options:\n', utils.dict2str(opt))
 
     for inp_path in opt['input_path']:
         single_img =  inp_path.suffix in ['.jpg', '.bmp', '.png', '.tiff']
@@ -35,7 +31,7 @@ def parseargs():
     parser.add_argument('-i', '--input_path', type=str, nargs='+', help='img path or imgs dir')
     parser.add_argument('-o', '--output_dir', type=str, help='output dir')
     parser.add_argument('--chop', action='store_true', help='use chop forward')
-    parser.add_argument('--models_conf', type=str, default='./models.yml', help='Path to models config Yaml file.')
+    parser.add_argument('--models_conf', type=str, default='./code/settings/models.yml', help='Path to models config Yaml file.')
     parser.add_argument('--load_weights', type=str, required=False, default=None, help='load specific model weights. Only support single model')
     parser.add_argument('--modelargs', type=yaml.safe_load, required=False, default=None, help='extra model args to instantialize model.Only support single model')
     parser.add_argument('--list', action='store_true', help='List available models.')
@@ -71,7 +67,7 @@ def process_single_img(inp_path ,opt, prepared_models):
 def process_clips(inp_path, opt, prepared_models):
     utils.ifnot_mkdir(opt['output_dir'])
 
-    if len(datasets.glob_pic(inp_path)) > 0:
+    if len(utils.glob_pic(inp_path)) > 0:
         clip_paths = [inp_path]
     else:
         # contains several clips
