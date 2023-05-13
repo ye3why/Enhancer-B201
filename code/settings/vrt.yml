@@ -1,0 +1,19 @@
+VRTx4_bd:
+    class: VRT
+    modelargs:
+      upscale: 4
+      img_size: [8,64,64]
+      window_size: [8,8,8]
+      depths: [8,8,8,8,8,8,8, 4,4,4,4, 4,4]
+      indep_reconsts: [11,12]
+      embed_dims: [120,120,120,120,120,120,120, 180,180,180,180, 180,180]
+      num_heads: [6,6,6,6,6,6,6, 6,6,6,6, 6,6]
+      pa_frames: 4
+      deformable_groups: 16
+    pretrain: ./weights/004_VRT_videosr_bd_Vimeo_7frames.pth
+    dataset_class: VideoMinMoutDataset
+    nframes: 6
+    chopable: true
+    multi_output: true
+    need_pad: 8
+    model_scale: 4

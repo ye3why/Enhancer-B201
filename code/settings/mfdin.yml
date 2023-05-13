@@ -1,0 +1,76 @@
+DeInterlace:
+    # remove video interlace
+    # pytorch > 1.7
+    class: MFDIN_DeInterlace
+    modelargs:
+      nf: 64
+      groups: 4
+      front_RBs: 5
+      back_RFAs: 2
+      center: ~
+      nfields: 5
+    pretrain: ./weights/mfdin_2x_2p_weights.pth
+    dataset_class: VideoDataset
+    nframes: 3
+    chopable: true
+    need_pad: 8
+    model_scale: 1
+
+MFDIN_2X:
+    # remove video interlace and 2x SR
+    # pytorch > 1.7
+    class: MFDIN_2X
+    modelargs:
+      nf: 64
+      groups: 4
+      front_RBs: 5
+      back_RFAs: 2
+      center: ~
+      nfields: 5
+    pretrain: ./weights/mfdin_2x_2p_weights.pth
+    dataset_class: VideoDataset
+    nframes: 3
+    chopable: true
+    need_pad: 8
+    model_scale: 2
+
+MFDIN_2P:
+    # remove video interlace and 2x video frame interpolate
+    # pytorch > 1.7
+    class: MFDIN_2P
+    modelargs:
+      nf: 64
+      groups: 4
+      front_RBs: 5
+      back_RFAs: 2
+      center: ~
+      nfields: 5
+    pretrain: ./weights/mfdin_2x_2p_weights.pth
+    dataset_class: FrameInterpDataset
+    multi_output: true
+    nframes: 3
+    chopable: true
+    need_pad: 8
+    model_scale: 1
+    frame_scale: 2
+
+MFDIN_2X2P:
+    # full MFDIN, see https://github.com/anymyb/MFDIN
+    # pytorch > 1.7
+    # remove video interlace, 2x SR and 2x video frame interpolate
+    class: MFDIN_2X2P
+    modelargs:
+      nf: 64
+      groups: 4
+      front_RBs: 5
+      back_RFAs: 2
+      center: ~
+      nfields: 5
+    pretrain: ./weights/mfdin_2x_2p_weights.pth
+    dataset_class: FrameInterpDataset
+    multi_output: true
+    nframes: 3
+    chopable: true
+    need_pad: 8
+    model_scale: 2
+    frame_scale: 2

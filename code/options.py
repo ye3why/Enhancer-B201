@@ -3,12 +3,16 @@ import copy
 import os
 from collections import OrderedDict
 from pathlib import Path
+from tabulate import tabulate
 import utils
+
+SETTINGS_PATH = Path(__file__).parent.joinpath('settings')
+PRESET_PATH = Path(__file__).parent.joinpath('presets.yml')
+MODEL_DEFAULT_PATH = SETTINGS_PATH.joinpath('default.yml')
 
 
 def parse(args):
-    preset_path = './code/settings/presets.yml'
-    with open(preset_path, mode='r') as f:
+    with open(PRESET_PATH, mode='r') as f:
         Loader, _ = utils.ordered_yaml()
         preset = yaml.load(f, Loader=Loader)
     videopresets = preset.pop('presets')
@@ -47,9 +51,18 @@ def parse(args):
     return opt, models_conf
 
 def parse_modelsconf(opt):
-    models_conf = utils.load_ymal(opt['models_conf'])
-    # set default options
+    all_setting_files = SETTINGS_PATH.rglob('*.yml')
+    models_conf = OrderedDict()
+    for f in all_setting_files:
+        models_conf.update(utils.load_ymal(f))
+
     defult_opt = models_conf.pop('Default')
+
+
+    if opt['models_conf']:
+        models_conf = utils.load_ymal(opt['models_conf'])
+
+    # set default options
     for name, m in models_conf.items():
         for k, v in defult_opt.items():
             if not m.get(k):
@@ -61,3 +74,13 @@ def parse_modelsconf(opt):
             m['modelargs'].update(opt['modelargs'])
 
     return models_conf
+
+def print_available_models(models_conf):
+    print('\nAvailable models:')
+    table = []
+    for m_name in models_conf.keys():
+        desc = models_conf[m_name]['description']
+        table.append([None, '-', m_name, desc])
+        # print(f'  - {m_name} \t{desc}')
+    tabulate.PRESERVE_WHITESPACE = True
+    print(tabulate(table, tablefmt='plain', maxcolwidths=[None, None, None, 50]))

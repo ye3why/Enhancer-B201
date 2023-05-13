@@ -51,23 +51,22 @@ def parseargs():
 
     # others
     parser.add_argument('--models_conf', type=str, help='Path to models config Yaml file.')
-    parser.add_argument('--list', action='store_true', help='List available models.')
+    parser.add_argument('-l', '--list', action='store_true', help='List available models.')
     parser.add_argument('--debug', action='store_true', help='Debug mode.')
 
     args = parser.parse_args()
-
-    assert args.opt or args.input_path, 'Please provide input using --opt or --input_path.'
-    if args.opt and args.input_path:
-        print(f'Use input from {args.opt}, ignore --input_path.')
 
     opt, models_conf = options.parse(args)
 
     if args.list:
         parser.print_help()
-        print('\nAvailable models:')
-        for m in models_conf.keys():
-            print('  - ' + m)
+        options.print_available_models(models_conf)
         exit(0)
+
+    assert args.opt or args.input_path, 'Please provide input using --opt or --input_path.'
+    if args.opt and args.input_path:
+        print(f'Use input from {args.opt}, ignore --input_path.')
+
 
     return opt, models_conf
 

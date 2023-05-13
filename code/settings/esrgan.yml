@@ -1,0 +1,46 @@
+RealESRGANx2:
+    class: RRDBNet
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        scale: 2
+        num_feat: 64
+        num_block: 23
+        num_grow_ch: 32
+    pretrain: ./weights/RealESRGAN_x2plus.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 2
+
+RealESRGANx4:
+    class: RRDBNet
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        scale: 4
+        num_feat: 64
+        num_block: 23
+        num_grow_ch: 32
+    pretrain: ./weights/RealESRGAN_x4plus.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 4
+
+ESRGANx4:
+    class: RRDBESRGAN
+    modelargs:
+        in_nc: 3
+        out_nc: 3
+        nf: 64
+        nb: 23
+        gc: 32
+    pretrain: ./weights/RRDB_ESRGAN_x4.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 4

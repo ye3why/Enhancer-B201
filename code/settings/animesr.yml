@@ -1,0 +1,65 @@
+AnimeSRv1x4:
+    # from https://github.com/TencentARC/AnimeSR
+    class: MSRSWVSR
+    modelargs:
+        num_feat: 64
+        num_block: [5, 3, 2]
+        netscale: 4
+    pretrain: ./weights/AnimeSR_v1-PaperModel.pth
+    dataset_class: VideoDataset
+    nframes: 3
+    chopable: true
+    need_pad: 4
+    need_refresh: true
+    model_scale: 4
+
+AnimeSRv2x4:
+    # from https://github.com/TencentARC/AnimeSR
+    class: MSRSWVSR
+    modelargs:
+        num_feat: 64
+        num_block: [5, 3, 2]
+        netscale: 4
+    pretrain: ./weights/AnimeSR_v2.pth
+    dataset_class: VideoDataset
+    nframes: 3
+    chopable: true
+    need_pad: 4
+    need_refresh: true
+    model_scale: 4
+
+
+AnimeSRx4:
+    # from https://github.com/TencentARC/AnimeSR
+    class: AnimeSR
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        num_feat: 64
+        num_conv: 16
+        upscale: 4
+        act_type: 'prelu'
+    pretrain: ./weights/realesr-animevideov3.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 4
+
+
+AnimeSRx4_6b:
+    # from https://github.com/TencentARC/AnimeSR
+    class: AnimeSRRRDB
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        num_feat: 64
+        num_block: 6
+        upscale: 4
+        num_grow_ch: 32
+    pretrain: ./weights/RealESRGAN_x4plus_anime_6B.pth
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    nframes: 1
+    model_scale: 4

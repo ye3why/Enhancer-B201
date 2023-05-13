@@ -1,0 +1,16 @@
+EDSRx2:
+    description: 'classic SISR, PSNR oriented. '
+    class: EDSR
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        num_feat: 64
+        num_block: 16
+        upscale: 2
+        res_scale: 1
+        img_range: 255.
+        rgb_mean: [0.4488, 0.4371, 0.4040]
+    pretrain: ./weights/EDSR_Mx2_f64b16_DIV2K_official-3ba7b086.pth
+    dataset_class: ImageDataset
+    chopable: true
+    model_scale: 2

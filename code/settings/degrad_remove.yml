@@ -1,0 +1,70 @@
+ChromaticCorrect:
+    # correct chromatic abberation
+    class: RRDBNet
+    modelargs:
+        num_in_ch: 3
+        num_out_ch: 3
+        scale: 1
+        num_feat: 64
+        num_block: 23
+        num_grow_ch: 32
+    pretrain: ./weights/chromaticcorrect.pth
+    dataset_class: ImageDataset
+    nframes: 1
+    need_pad: 4
+
+CAR:
+    # remove compression artifacts
+    class: LightCACnn
+    modelargs:
+        num_feat: 64
+        num_block: 6
+    pretrain: ./weights/light_ca_cnn_0711_weights.pth
+    dataset_class: ImageDataset
+    nframes: 1
+
+
+Descratch_bw:
+    class: DescratchNet
+    modelargs:
+        n_feats: 32
+        n_frames: 3
+    pretrain: ./weights/descratch_bw_weights.pt
+    dataset_class: VideoDataset
+    nframes: 3
+
+Descratch_white:
+    class: DescratchNet
+    modelargs:
+        n_feats: 32
+        n_frames: 3
+    pretrain: ./weights/descratch_w_weights.pt
+    dataset_class: VideoDataset
+    nframes: 3
+
+Denoise_low:
+    class: DenoiseNet
+    modelargs:
+        num_input_frames: 5
+        noise_std: 10
+    pretrain: ./weights/denoise_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+
+Denoise_medium:
+    class: DenoiseNet
+    modelargs:
+        num_input_frames: 5
+        noise_std: 20
+    pretrain: ./weights/denoise_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+
+Denoise_high:
+    class: DenoiseNet
+    modelargs:
+        num_input_frames: 5
+        noise_std: 30
+    pretrain: ./weights/denoise_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5

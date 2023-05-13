@@ -1,0 +1,11 @@
+################################## HDR ####################################
+HLG:
+    # sdr to hdr(hlg)
+    class: LEBDE
+    modelargs:
+        planes: 32
+    pretrain: ./weights/HLG_weights.pt
+    dataset_class: ImageDataset
+    saveimg_function: hlg
+    nframes: 1
+

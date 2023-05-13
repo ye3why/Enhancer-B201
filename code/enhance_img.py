@@ -31,23 +31,21 @@ def parseargs():
     parser.add_argument('-i', '--input_path', type=str, nargs='+', help='img path or imgs dir')
     parser.add_argument('-o', '--output_dir', type=str, help='output dir')
     parser.add_argument('--chop', action='store_true', help='use chop forward')
-    parser.add_argument('--models_conf', type=str, default='./code/settings/models.yml', help='Path to models config Yaml file.')
+    parser.add_argument('--models_conf', type=str, help='Path to models config Yaml file.')
     parser.add_argument('--load_weights', type=str, required=False, default=None, help='load specific model weights. Only support single model')
     parser.add_argument('--modelargs', type=yaml.safe_load, required=False, default=None, help='extra model args to instantialize model.Only support single model')
-    parser.add_argument('--list', action='store_true', help='List available models.')
+    parser.add_argument('-l', '--list', action='store_true', help='List available models.')
 
     args = parser.parse_args()
-
-    assert  args.input_path, 'Please provide input.'
 
     opt, models_conf = options.parse(args)
 
     if args.list:
         parser.print_help()
-        print('\nAvailable models:')
-        for m in models_conf.keys():
-            print('  - ' + m)
+        options.print_available_models(models_conf)
         exit(0)
+
+    assert  args.input_path, 'Please provide input.'
 
     return opt, models_conf
 

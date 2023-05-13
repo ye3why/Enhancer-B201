@@ -1,0 +1,33 @@
+######################### Video Super-Resolution models ######################
+BasicVSR_ds_x2:
+    class: BasicVSR_ds
+    modelargs:
+      num_feat: 64
+      num_block: 15
+      ds_factor: 2
+      scale: 2
+    pretrain: ./weights/BasicVSR_ds_x2_weights.pt
+    dataset_class: VideoMinMoutDataset
+    nframes: 10
+    chopable: true
+    multi_output: true
+    need_pad: 4
+    model_scale: 2
+
+RealBasicVSR_x4:
+    class: RealBasicVSRNet
+    modelargs:
+      mid_channels: 64
+      num_propagation_blocks: 20
+      num_cleaning_blocks: 20
+      dynamic_refine_thres: 255
+      spynet_pretrained: None
+      is_fix_cleaning: False
+      is_sequential_cleaning: true
+    pretrain: ./weights/RealBasicVSR_x4.pth
+    dataset_class: VideoMinMoutDataset
+    nframes: 10
+    chopable: true
+    multi_output: true
+    need_pad: 4
+    model_scale: 4

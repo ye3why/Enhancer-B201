@@ -1,0 +1,17 @@
+Bicubic1/2:
+    class: Bicubic
+    modelargs:
+      scale_factor: 0.5
+    pretrain: ~
+    model_scale: 0.5
+    dataset_class: ImageDataset
+    nframes: 1
+
+Bicubic1/4:
+    class: Bicubic
+    modelargs:
+      scale_factor: 0.25
+    pretrain: ~
+    model_scale: 0.25
+    dataset_class: ImageDataset
+    nframes: 1

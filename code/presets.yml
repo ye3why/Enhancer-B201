@@ -1,6 +1,10 @@
+input_path:
+    - ''
+output_dir: 'demo/result'
+
 # general settings
 ffmpeg_cmd: ffmpeg
-models_conf: ./code/settings/models.yml
+models_conf: null
 batch_size_per_gpu: 1
 num_imgsavers: 10
 chop_forward: false

@@ -1,0 +1,78 @@
+SRx2:
+    # 2x SR
+    # pytorch == 1.10,  compiled deformable convolution
+    class: EDVR
+    modelargs:
+        nf: 64
+        nframes: 5
+        groups: 8
+        front_RBs: 5
+        back_RBs: 20
+        scale: 2
+        center: ~
+        ds_factor: 2
+    pretrain: ./weights/edvr_x2_ds_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+    chopable: true
+    need_pad: 4
+    model_scale: 2
+
+SRx3:
+    # 3x SR
+    # pytorch == 1.10,  compiled deformable convolution
+    class: RealVideoNet
+    modelargs:
+        nf: 96
+        nframes: 5
+        groups: 8
+        front_RBs: 5
+        RFAs: 4
+        scale: 3
+        ds_factor: 2
+        hr_conv: true
+    pretrain: ./weights/x3_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+    chopable: true
+    need_pad: 4
+    model_scale: 3
+
+SRx4:
+    # 4x SR
+    # pytorch == 1.10,  compiled deformable convolution
+    class: RealVideoNet
+    modelargs:
+        nf: 96
+        nframes: 5
+        groups: 8
+        front_RBs: 5
+        RFAs: 4
+        scale: 4
+        ds_factor: 2
+        hr_conv: true
+    pretrain: ./weights/x4_weights.pt
+    dataset_class: VideoDataset
+    nframes: 5
+    chopable: true
+    need_pad: 4
+    model_scale: 4
+
+SRx2img:
+    # 2x SR
+    # pytorch == 1.10,  compiled deformable convolution
+    class: EDVR_single
+    modelargs:
+        nf: 64
+        nframes: 5
+        groups: 8
+        front_RBs: 5
+        back_RBs: 20
+        scale: 2
+        center: ~
+        ds_factor: 2
+    pretrain: ./weights/edvr_x2_ds_weights.pt
+    dataset_class: ImageDataset
+    chopable: true
+    need_pad: 4
+    model_scale: 2
