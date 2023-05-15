@@ -4,8 +4,6 @@ input_path:
 output_dir: demo/result
 
 batch_size_per_gpu: 1
-chop_forward: true
-chop_threshold: 160000
 
 tempdir_type: mem # mem or disk
 keep_clip_results: false
@@ -21,13 +19,12 @@ models:
     - EDSRx2
 
 # video specifications
+output_ext: .mov
 video_spec:
-    ext: .mov
-    bitrate: 50M
-    output_kwargs:
-        vcodec: h264
-        colorspace: bt709
-        pix_fmt: yuv420p
+    video_bitrate: 50M
+    vcodec: h264
+    colorspace: bt709
+    pix_fmt: yuv420p
 
 # ffmpeg video filters
 vfs:

@@ -36,6 +36,13 @@ def parse(args):
         if 'preset'in args and args.preset:
             assert args.preset in videopresets.keys(), f'{args.preset} not in presets.yml.'
             opt['video_spec'] = videopresets[args.preset]
+        if 'video_bitrate' in args and args.video_bitrate:
+            opt['video_spec']['video_bitrate'] = args.video_bitrate
+            opt.pop('video_bitrate')
+        if 'fps' in args and args.fps:
+            opt['vfs']['fps'] = args.fps
+            opt.pop('fps')
+
 
 
     os.environ['CUDA_VISIBLE_DEVICES'] = os.environ.get('CUDA_VISIBLE_DEVICES', '0')

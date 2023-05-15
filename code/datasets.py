@@ -12,6 +12,7 @@ import utils
 class ImageDataset(data.Dataset):
     def __init__(self, video_dir, n_frames):
         super(ImageDataset, self).__init__()
+        self.video_dir = video_dir
         # self.img_path = list(Path(video_dir).glob('*.png'))
         self.img_path = utils.glob_pic(video_dir)
         self.video_len = len(self.img_path)
@@ -27,7 +28,8 @@ class ImageDataset(data.Dataset):
         lr = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR|cv2.IMREAD_ANYDEPTH)
         lr = lr[:, :, [2, 1, 0]]
         lr = self.transformer(lr) # [0.0, 1.0]
-        return lr, filename
+        # return lr, filename
+        return {'inp': lr, 'filename': filename, 'dirname': self.video_dir.name}
 
     def __len__(self):
         return len(self.img_path)
@@ -37,6 +39,7 @@ class ImageDataset(data.Dataset):
 class VideoDataset(data.Dataset):
     def __init__(self, video_dir, n_frames):
         super(VideoDataset, self).__init__()
+        self.video_dir = video_dir
         self.n_frames = n_frames
         # self.img_path = list(Path(video_dir).glob('*.png'))
         self.img_path = sorted(utils.glob_pic(video_dir))
@@ -63,7 +66,8 @@ class VideoDataset(data.Dataset):
             lrs.append(temp)
         lrs = torch.stack(lrs, dim=0)
 
-        return lrs, filename
+        # return lrs, filename
+        return {'inp': lrs, 'filename': filename, 'dirname': self.video_dir.name}
 
     def __len__(self):
         return len(self.img_path)
@@ -87,7 +91,6 @@ class VideoDataset(data.Dataset):
 @DATASET_REGISTRY.register()
 class FrameInterpDataset(VideoDataset):
     '''Video Dataset for Video frame interplation
-    please set model configuration in models.yml, multi_output: true
     '''
     def __init__(self, video_dir, n_frames):
         super(FrameInterpDataset, self).__init__(video_dir, n_frames)
@@ -96,7 +99,9 @@ class FrameInterpDataset(VideoDataset):
         lr_path = self.img_path[idx]
         stem, suffix = lr_path.stem, lr_path.suffix
         # filename = [str(int(stem)*2-1) + suffix, str(int(stem)*2) + suffix]
-        filename = ['{:>08d}'.format(int(stem)*2-1) + suffix, '{:>08d}'.format(int(stem)*2) + suffix]
+        # filename = ['{:>08d}'.format(int(stem)*2-1) + suffix, '{:>08d}'.format(int(stem)*2) + suffix]
+        # save filename from 00000000.png
+        filename = ['{:>08d}'.format(idx*2) + suffix, '{:>08d}'.format(idx*2+1) + suffix]
         idxs = self.index_generation(idx, self.video_len - 1, self.n_frames, 0)
         lrs = []
         for neighbor_idx in idxs:
@@ -108,16 +113,17 @@ class FrameInterpDataset(VideoDataset):
             lrs.append(temp)
         lrs = torch.stack(lrs, dim=0)
 
-        return lrs, filename
+        # return lrs, filename
+        return {'inp': lrs, 'filename': filename, 'dirname': self.video_dir.name}
 
 
 @DATASET_REGISTRY.register()
 class VideoMinMoutDataset(data.Dataset):
     '''Video Dataset for multi-frame input multi-frame output models
-    please set model configuration in models.yml, multi_output: true
     '''
     def __init__(self, video_dir, n_frames):
         super(VideoMinMoutDataset, self).__init__()
+        self.video_dir = video_dir
         self.n_frames = n_frames
         # self.img_path = list(Path(video_dir).glob('*.png'))
         self.img_path = sorted(utils.glob_pic(video_dir))
@@ -136,7 +142,8 @@ class VideoMinMoutDataset(data.Dataset):
             lrs.append(temp)
         lrs = torch.stack(lrs, dim=0)
 
-        return lrs, filenames
+        # return lrs, filenames
+        return {'inp': lrs, 'filename': filename, 'dirname': self.video_dir.name}
 
     def __len__(self):
         return len(self.clip_idx)

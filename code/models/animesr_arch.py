@@ -160,7 +160,8 @@ class MSRSWVSR(nn.Module):
         self.lrelu = nn.LeakyReLU(negative_slope=0.1)
         self.pixel_shuffle = nn.PixelShuffle(netscale)
         self.netscale = netscale
-        self.newclip = True
+        self.dirname = None
+        self.state, self.out = None, None
 
     def cell(self, x, fb, state):
         res = x[:, 3:6]
@@ -189,20 +190,21 @@ class MSRSWVSR(nn.Module):
                 # out, state = self.cell(torch.cat((x[:, i - 1], x[:, i], x[:, i]), dim=1), out, state)
             # else:
                 # out, state = self.cell(torch.cat((x[:, i - 1], x[:, i], x[:, i + 1]), dim=1), out, state)
-            # out_l.append(out)
+            # out_l.append(out.cpu())
 
         # return torch.stack(out_l, dim=1)
 
-    def refresh(self):
-        self.newclip = True
 
-    def forward(self, x):
+    def forward(self, x, **kwargs):
         b, n, c, h, w = x.size()
-        prev, cur, nex = x[:, 0], x[:, 1], x[:, 2]
-        # initialize previous sr frame and previous hidden state as zero tensor
-        if self.newclip:
-            self.newclip = False
+        dirname =  kwargs.get('dirname', None)
+        if dirname != self.dirname or self.state is None:
+            print(f' Got new clip: {dirname}, Refresh model state.')
             self.out = x.new_zeros(b, c, h * self.netscale, w * self.netscale)
             self.state = x.new_zeros(b, self.num_feat, h, w)
+            self.dirname = dirname
+
+        prev, cur, nex = x[:, 0], x[:, 1], x[:, 2]
+        # initialize previous sr frame and previous hidden state as zero tensor
         self.out, self.state = self.cell(torch.cat((prev, cur, nex), dim=1), self.out, self.state)
         return self.out.clone()

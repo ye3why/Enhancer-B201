@@ -6,8 +6,6 @@ Default:
     nframes: 1
     chopable: false
     need_pad: false
-    need_refresh: false
-    multi_output: false
     model_scale: 1
     frame_scale: 1
     saveimg_function: sdr

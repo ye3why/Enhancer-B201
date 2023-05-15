@@ -42,17 +42,23 @@ def parseargs():
     parser.add_argument('-i', '--input_path', type=str, nargs='+', help='Input video Path or video directory path.')
     parser.add_argument('-o', '--output_dir', type=str, default='./demo/result', help='Output directory.')
     parser.add_argument('--preset', type=str, default='h264', help='Choose video output preset from presets.yml.')
-    parser.add_argument('-m', '--model_list', type=str, nargs='+', help='choose models from models.yml')
+    parser.add_argument('-m', '--models', type=str, nargs='+', help='choose models from models.yml')
     # parser.add_argument('--vf_str', type=str, help='Video filter string for ffmpeg, vf=vf_str.')
     parser.add_argument('--chop', action='store_true', help='use chop forward')
+    parser.add_argument('--chop_threshold', type=int, help='chop if pixels more than chop_threshold.')
+    parser.add_argument('--tile', action='store_true', help='use tile forward')
+    parser.add_argument('--tile_size', type=int, help='tile size')
+    parser.add_argument('--tile_pad', type=int, help='tile overlap.')
     parser.add_argument('--fps', type=int, help='Output FPS.')
-    parser.add_argument('--bitrate', type=str, help='Output bitrate.')
+    parser.add_argument('--video_bitrate', type=str, help='Output bitrate.')
     parser.add_argument('--ffmpeg_cmd', type=str, help='ffmpeg command path.')
 
     # others
     parser.add_argument('--models_conf', type=str, help='Path to models config Yaml file.')
     parser.add_argument('-l', '--list', action='store_true', help='List available models.')
     parser.add_argument('--debug', action='store_true', help='Debug mode.')
+    parser.add_argument('--keep_png_results', action='store_true', help='Keep image results.')
+    parser.add_argument('--keep_clip_results', action='store_true', help='Keep clip results.')
 
     args = parser.parse_args()
 
@@ -96,6 +102,7 @@ def getvf(opt):
             vf_str = vf_str + ',' + vf
         else:
             vf_str = vf
+    if vf_str == '': return 'null'
     return vf_str
 
 
@@ -109,14 +116,9 @@ def compressclip(save_tmpdir, split_res_dir, video_path, finishedlist_lock, opt)
         (
             ffmpeg
             # .input(str(input_tmpdir_path.joinpath('%d.png')), r=frame_rate)
-            .input(str(save_tmpdir.getPath().joinpath('%8d.png')), r=save_frame_rate)
+            .input(str(save_tmpdir.getPath().joinpath('%08d.png')), r=save_frame_rate)
             .output(str(split_res_dir.joinpath(video_path.name)),
-                    vf=vf_str,
-                    # pix_fmt=opt['video_spec']['pix_fmt'],
-                    # colorspace=opt['video_spec']['colorspace'],
-                    # vcodec=opt['video_spec']['vcodec'],
-                    video_bitrate=opt['video_spec']['bitrate'],
-                    **opt['video_spec']['output_kwargs'])
+                    vf=vf_str, **opt['video_spec'])
             .run(quiet=opt['ffmpeg_quiet'], overwrite_output=True, cmd=opt['ffmpeg_cmd'])
         )
     except ffmpeg.Error as e:
@@ -143,7 +145,7 @@ def process_video(video_path, opt, prepared_models):
     '''
     finishedlist_lock = threading.Lock()
 
-    output_name = video_path.stem + opt['video_spec']['ext']
+    output_name = video_path.stem + opt['output_ext']
 
     # split video to clips
     split_res_dir = opt['output_dir'].joinpath('tmp.split_res_' + video_path.stem)

@@ -6,12 +6,14 @@ AnimeSRv1x4:
         num_block: [5, 3, 2]
         netscale: 4
     pretrain: ./weights/AnimeSR_v1-PaperModel.pth
+    need_pad: 4
+    model_scale: 4
     dataset_class: VideoDataset
     nframes: 3
-    chopable: true
-    need_pad: 4
-    need_refresh: true
-    model_scale: 4
+    chopable: false
+    #dataset_class: VideoMinMoutDataset
+    #nframes: 100
+    #chopable: true
 
 AnimeSRv2x4:
     # from https://github.com/TencentARC/AnimeSR
@@ -23,9 +25,8 @@ AnimeSRv2x4:
     pretrain: ./weights/AnimeSR_v2.pth
     dataset_class: VideoDataset
     nframes: 3
-    chopable: true
+    chopable: false
     need_pad: 4
-    need_refresh: true
     model_scale: 4
 
 

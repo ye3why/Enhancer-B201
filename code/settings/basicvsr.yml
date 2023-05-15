@@ -10,7 +10,6 @@ BasicVSR_ds_x2:
     dataset_class: VideoMinMoutDataset
     nframes: 10
     chopable: true
-    multi_output: true
     need_pad: 4
     model_scale: 2
 
@@ -28,6 +27,5 @@ RealBasicVSR_x4:
     dataset_class: VideoMinMoutDataset
     nframes: 10
     chopable: true
-    multi_output: true
     need_pad: 4
     model_scale: 4

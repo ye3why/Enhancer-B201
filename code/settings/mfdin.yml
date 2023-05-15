@@ -47,7 +47,6 @@ MFDIN_2P:
       nfields: 5
     pretrain: ./weights/mfdin_2x_2p_weights.pth
     dataset_class: FrameInterpDataset
-    multi_output: true
     nframes: 3
     chopable: true
     need_pad: 8
@@ -68,7 +67,6 @@ MFDIN_2X2P:
       nfields: 5
     pretrain: ./weights/mfdin_2x_2p_weights.pth
     dataset_class: FrameInterpDataset
-    multi_output: true
     nframes: 3
     chopable: true
     need_pad: 8

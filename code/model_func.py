@@ -28,9 +28,11 @@ def prepare_model(opt, models_conf):
         m['name'] = model_name
         models_module.import_model(m['class'])  # import model class as need
         m['net'] = MODEL_REGISTRY.get(m['class'])(**m['modelargs'])
-        if m['need_refresh']:
-            m['refresh_func'] = m['net'].refresh
 
+        if m['pretrain']:
+            print(f'\t Load pretrained weights from {m["pretrain"]}.')
+        else:
+            print('\t No pretrained weights provided.')
         m['net'] = utils.loadmodel(m['net'], m['pretrain'], opt['NGPUs'])
         m['dataset'] = DATASET_REGISTRY.get(m['dataset_class'])
 
@@ -38,42 +40,60 @@ def prepare_model(opt, models_conf):
         if m.get('need_pad'):
             m['net'] = functools.partial(utils.forward_pad, forward_function=m['net'],
                                          scale=scale, times=m['need_pad'])
-        if opt['chop_forward'] and m.get('chopable'):
+        if opt['tile'] and m.get('chopable'):
+            m['net'] = functools.partial(utils.forward_tile, forward_function=m['net'],
+                                         scale=scale, tile_size=opt['tile_size'], tile_pad=opt['tile_pad'])
+        if opt['chop'] and m.get('chopable'):
             m['net'] = functools.partial(utils.forward_chop, forward_function=m['net'],
-                                         scale=scale, n_GPUs=opt['NGPUs'],
-                                         multi_output=m['multi_output'], min_size=opt['chop_threshold'])
+                                         scale=scale, n_GPUs=opt['NGPUs'], min_size=opt['chop_threshold'])
+        if not m.get('chopable') and (opt['tile'] or opt['chop']):
+            print(f'\t Model: {model_name} doesn\'t support chop/tile forward.')
+
         prepared_models[model_name] = m
 
     return prepared_models
 
 
+@torch.no_grad()
 def model_forward(model_conf, input_tmpdir, save_tmpdir, opt):
     model = model_conf['net']
-    testset = model_conf['dataset'](input_tmpdir.getstring(), n_frames=model_conf['nframes'])
+    testset = model_conf['dataset'](input_tmpdir.getPath(), n_frames=model_conf['nframes'])
     dataloader = DataLoader(testset, batch_size=opt['batchsize'], shuffle=False, num_workers=4)
     saveimg_function = SAVEIMG_REGISTRY.get(model_conf['saveimg_function'])
     que = queue.Queue(maxsize=100)
     imgsavers = [utils.ImgSaver(saveimg_function, que, f'Saver_{i}') for i in range(opt['num_imgsavers'])]
     for saver in imgsavers:
         saver.start()
-    if model_conf['need_refresh']:
-        model_conf['refresh_func']()
-    with torch.no_grad():
-        for lr, filename in tqdm(dataloader):
-            lr = lr.to('cuda')
+
+    for inpdata in tqdm(dataloader):
+        for k, v in inpdata.items():
+            if torch.is_tensor(v):
+                inpdata[k] = v.to('cuda')
+        filename = inpdata.pop('filename')
+        lr = inpdata.pop('inp')
+        try:
+            sr = model(lr, **inpdata).cpu()
+        except TypeError as e:
             sr = model(lr).cpu()
-            # support models with multi-frame output
-            if model_conf['multi_output']:
-                sr = sr.transpose(0, 1).reshape(-1,*sr.shape[-3:])
-                filename = utils.flatten_list(filename)
-            for i in range(sr.shape[0]):
-                que.put({'img': sr[i], 'path': save_tmpdir.getPath().joinpath(filename[i])})
+
+        # lr = lr.to('cuda')
+        # sr = model(lr).cpu()
+        # support models with multi-frame output
+        multi_output = ( len(sr.shape) == 5 )
+        if multi_output:
+            sr = sr.transpose(0, 1).reshape(-1,*sr.shape[-3:])
+            filename = utils.flatten_list(filename)
+        assert len(sr) == len(filename), f'len(output_imgs) != len(output_filenames)'
+        for i in range(sr.shape[0]):
+            que.put({'img': sr[i], 'path': save_tmpdir.getPath().joinpath(filename[i])})
+
     for _ in range(opt['num_imgsavers']):
         que.put('quit')
     for saver in imgsavers:
         saver.join()
 
 
+@torch.no_grad()
 def sequential_forward(prepared_models, input_tmpdir, opt):
     save_tmpdir = input_tmpdir # if no models provided, return input
     for model_name in opt['models']:

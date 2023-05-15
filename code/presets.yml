@@ -7,8 +7,13 @@ ffmpeg_cmd: ffmpeg
 models_conf: null
 batch_size_per_gpu: 1
 num_imgsavers: 10
-chop_forward: false
+
+chop: false
 chop_threshold: 160000
+
+tile: false
+tile_size: 512
+tile_pad: 32
 
 # options for test
 tempdir_type: mem # mem or disk
@@ -20,43 +25,38 @@ debug: false
 segment_method: auto
 
 models: {}
+total_frame_scale: 1
+total_model_scale: 1
 
 
 # ffmpeg video filters
 vfs: {}
 
 # video specifications
+output_ext: .mov
 presets:
     h264:
-        ext: .mov
-        bitrate: 50M
-        output_kwargs:
-            vcodec: h264
-            colorspace: bt709
-            pix_fmt: yuv420p
+        video_bitrate: 50M
+        vcodec: h264
+        colorspace: bt709
+        pix_fmt: yuv420p
 
     x265:
-        ext: .mov
-        bitrate: 50M
-        output_kwargs:
-            vcodec: libx265
-            colorspace: bt709
-            pix_fmt: yuv420p
+        video_bitrate: 50M
+        vcodec: libx265
+        colorspace: bt709
+        pix_fmt: yuv420p
 
     hlg:
-        ext: .mov
-        bitrate: 50M
-        output_kwargs:
-            vcodec: libx265
-            pix_fmt: yuv420p10le
-            x265-params: 'colormatrix=bt2020nc:transfer=arib-std-b67:colorprim=bt2020:pools=36'
+        video_bitrate: 50M
+        vcodec: libx265
+        pix_fmt: yuv420p10le
+        x265-params: 'colormatrix=bt2020nc:transfer=arib-std-b67:colorprim=bt2020:pools=36'
 
     prores:
-        ext: .mov
-        bitrate: 50M
-        output_kwargs:
-            vcodec: prores_ks
-            colorspace: bt709
-            pix_fmt: yuv444p10le
-            'profile:v': 4
+        video_bitrate: 50M
+        vcodec: prores_ks
+        colorspace: bt709
+        pix_fmt: yuv444p10le
+        'profile:v': 4
 
