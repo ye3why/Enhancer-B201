@@ -3,27 +3,39 @@ import shutil
 import random
 import tempfile
 import os
+import time
 from pathlib import Path
 import re
 
-def glob_pic(dirname):
+def glob_pic(dirname, recursive=False):
     pics = []
-    for x in Path(dirname).glob('*'):
+    imgs = Path(dirname).rglob('*') if recursive else Path(dirname).glob('*')
+    for x in imgs:
         p = re.search('.*\.(jpe?g|png|bmp|tif)$', str(x), flags=re.IGNORECASE)
         if p is not None:
             pics.append(Path(p.group()))
     return pics
 
-
 def ifnot_mkdir(path):
-    if isinstance(path, Path):
-        if not path.exists():
-            path.mkdir()
-    elif isinstance(path, str):
-        if not os.path.exists(path):
-            os.mkdir(path)
-    else:
-        raise NotImplementedError
+    path = Path(path)
+    if not path.exists():
+        path.mkdir(parents=True)
+
+def get_time_str():
+    return time.strftime('%Y%m%d_%H%M%S', time.localtime())
+
+
+def mkdir_and_rename(path):
+    """mkdirs. If path exists, rename it with timestamp and create a new one.
+    """
+    path = Path(path)
+    if path.exists():
+        new_name = path.name + '_archived_' + get_time_str()
+        print(f'Path {path} already exists. Rename it to {new_name}', flush=True)
+        os.rename(path, path.parent.joinpath(new_name))
+    path.mkdir(parents=True)
+    # os.makedirs(path, exist_ok=True)
+
 
 def isImg(path):
     if isinstance(path, str):

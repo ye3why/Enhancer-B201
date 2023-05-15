@@ -16,27 +16,24 @@
 
 使用anaconda配置环境
 ```bash
-conda env create -f docker/pytorch1.10_docker.yml
+sudo apt install ffmpeg
+conda create --name enhancer-b201 python=3.7
+conda activate enhancer-b201
+pip install -r requirements.txt -f https://download.pytorch.org/whl/cu113/torch_stable.html
 ```
 
 或使用docker配置环境，详见 [**使用Docker环境**](#使用Docker环境)
 
-### 安装
-(可选)仅部分模型需要安装
 
-Pytorch 1.10环境下
+### 输入视频，输出视频
 ```bash
-sh install.sh
+CUDA_VISIBLE_DEVICES=0,1 python enhance.py --input_path ./demo/demo_video.mp4 --output_dir demo/result --models EDSRx2
 ```
 
-### 测试
-- 单GPU
+### 输入图片数据集
 ```bash
-python enhance.py --opt options/demo.yml
-```
-- 多卡
-```bash
-CUDA_VISIBLE_DEVICES=0,1,2,3 python enhance.py --opt options/demo.yml
+python enhance.py --list
+CUDA_VISIBLE_DEVICES=0,1 python enhance_img.py --input_path path/to/img_datasets --output_dir path/to/save/results --models MODEL1 MODEL2 MODEL3
 ```
 
 ## 使用方法

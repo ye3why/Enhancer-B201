@@ -1,6 +1,6 @@
 # general settings
 input_path:
-    - demo/Youku_00565_h_GT.mp4
+    - demo/demo_video.mp4
 output_dir: demo/result
 
 batch_size_per_gpu: 1

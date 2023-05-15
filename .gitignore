@@ -2,6 +2,7 @@
 demo/result/*
 options/*
 weights/*
+evaluations/*
 docker/enhancer-b201.tar.gz
 !options/demo.yml
 !options/template.yml

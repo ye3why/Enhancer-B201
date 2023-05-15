@@ -1,5 +1,5 @@
 EDSRx2:
-    description: 'classic SISR, PSNR oriented. '
+    description: ''
     class: EDSR
     modelargs:
         num_in_ch: 3

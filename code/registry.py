@@ -78,3 +78,4 @@ class Registry():
 DATASET_REGISTRY = Registry('dataset')
 MODEL_REGISTRY = Registry('model')
 SAVEIMG_REGISTRY = Registry('save_img')
+METRIC_REGISTRY = Registry('metric')

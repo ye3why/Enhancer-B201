@@ -9,7 +9,7 @@ import datasets
 import save_func
 import options
 import utils
-from model_process import prepare_model, sequential_forward
+from model_func import prepare_model, sequential_forward
 
 
 def main():
