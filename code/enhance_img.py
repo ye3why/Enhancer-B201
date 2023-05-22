@@ -73,7 +73,7 @@ def process_clips(inp_path, opt, prepared_models):
         clip_paths = [inp_path]
     else:
         # contains several clips
-        clip_paths = list(inp_path.glob('*'))
+        clip_paths = sorted(list(inp_path.glob('*')))
 
 
     for clip_path in tqdm(clip_paths, unit='clip'):
