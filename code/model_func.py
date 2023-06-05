@@ -31,9 +31,9 @@ def prepare_model(opt, models_conf):
 
         if m['pretrain']:
             print(f'\t Load pretrained weights from {m["pretrain"]}.')
+            m['net'] = utils.loadmodel(m['net'], m['pretrain'], opt['NGPUs'])
         else:
             print('\t No pretrained weights provided.')
-        m['net'] = utils.loadmodel(m['net'], m['pretrain'], opt['NGPUs'])
         m['dataset'] = DATASET_REGISTRY.get(m['dataset_class'])
 
         scale = m.get('model_scale', 1)

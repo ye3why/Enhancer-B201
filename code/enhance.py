@@ -43,7 +43,7 @@ def parseargs():
     parser.add_argument('-o', '--output_dir', type=str, default='./demo/result', help='Output directory.')
     parser.add_argument('--preset', type=str, default='h264', help='Choose video output preset from presets.yml.')
     parser.add_argument('-m', '--models', type=str, nargs='+', help='choose models from models.yml')
-    # parser.add_argument('--vf_str', type=str, help='Video filter string for ffmpeg, vf=vf_str.')
+    parser.add_argument('--vf_str', type=str, help='Video filter string for ffmpeg, vf=vf_str.')
     parser.add_argument('--chop', action='store_true', help='use chop forward')
     parser.add_argument('--chop_threshold', type=int, help='chop if pixels more than chop_threshold.')
     parser.add_argument('--tile', action='store_true', help='use tile forward')
@@ -94,7 +94,10 @@ def resume(opt):
 
 
 def getvf(opt):
-    vf_str = ''
+    if 'vf_str' in opt:
+        vf_str = opt['vf_str']
+    else:
+        vf_str = ''
     for vf, vf_args in opt['vfs'].items():
         if vf_args:
             vf = vf + '=' + str(vf_args)
