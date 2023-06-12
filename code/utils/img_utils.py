@@ -37,6 +37,6 @@ class ImgSaver(threading.Thread):
             msg = self._queue.get()
             if isinstance(msg, str) and msg == 'quit':
                 break
-            self.save_func(msg['img'], msg['path'])
+            self.save_func(msg['img'], msg['path'], msg['datainfo'])
         # print(f'{self.qid} quit.')
 

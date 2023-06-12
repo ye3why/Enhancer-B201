@@ -41,6 +41,7 @@ def parseargs():
     # followings will be ignored if --opt provided
     parser.add_argument('-i', '--input_path', type=str, nargs='+', help='Input video Path or video directory path.')
     parser.add_argument('-o', '--output_dir', type=str, default='./demo/result', help='Output directory.')
+    parser.add_argument('--output_ext', type=str, help='output video\'s extension.')
     parser.add_argument('--preset', type=str, default='h264', help='Choose video output preset from presets.yml.')
     parser.add_argument('-m', '--models', type=str, nargs='+', help='choose models from models.yml')
     parser.add_argument('--vf_str', type=str, help='Video filter string for ffmpeg, vf=vf_str.')

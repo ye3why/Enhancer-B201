@@ -71,6 +71,9 @@ def model_forward(model_conf, input_tmpdir, save_tmpdir, opt):
                 inpdata[k] = v.to('cuda')
         filename = inpdata.pop('filename')
         lr = inpdata.pop('inp')
+        datainfo = inpdata.pop('saver_info') if 'saver_info' in inpdata else None
+        if datainfo:
+            datainfo = utils.dict_debatch(datainfo)
         try:
             sr = model(lr, **inpdata).cpu()
         except TypeError as e:
@@ -85,7 +88,8 @@ def model_forward(model_conf, input_tmpdir, save_tmpdir, opt):
             filename = utils.flatten_list(filename)
         assert len(sr) == len(filename), f'len(output_imgs) != len(output_filenames)'
         for i in range(sr.shape[0]):
-            que.put({'img': sr[i], 'path': save_tmpdir.getPath().joinpath(filename[i])})
+            dinfo = datainfo[i] if datainfo else None
+            que.put({'img': sr[i], 'datainfo': dinfo, 'path': save_tmpdir.getPath().joinpath(filename[i])})
 
     for _ in range(opt['num_imgsavers']):
         que.put('quit')

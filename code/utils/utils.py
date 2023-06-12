@@ -26,3 +26,12 @@ class Writer():
     def print_blank_line(self, number=1):
         self.print_and_write('\n' * (number - 1)) # print(end='\n')
 
+
+def dict_debatch(datainfo):
+    res = []
+    for idx in range(datainfo[list(datainfo.keys())[0]].shape[0]):
+        tmp = {}
+        for k, v in datainfo.items():
+            tmp[k] = v[idx]
+        res.append(tmp)
+    return res
