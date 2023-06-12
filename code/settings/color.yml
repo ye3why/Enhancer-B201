@@ -1,0 +1,9 @@
+COLOR:
+    class: Color_ResNet
+    modelargs:
+
+    pretrain: ./weights/color_enhance.pth
+    dataset_class: ColorDataset
+    saveimg_function: colorenhance
+    #need_pad: 32
+
