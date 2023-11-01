@@ -1,0 +1,73 @@
+IRNp_x4:
+    class: InvRescaleNet
+    modelargs: 
+        channel_in: 3
+        channel_out: 3
+        subnet_type: DBNet
+        block_num: [8, 8]
+        down_scale: 4
+    pretrain: weights/IRN/IRN+_x4.pth
+    dataset_class: ImageDataset
+    chopable: true
+    model_scale: 4
+    saveimg_function: sdr
+
+IRN_x4:
+    class: InvRescaleNet
+    modelargs: 
+        channel_in: 3
+        channel_out: 3
+        subnet_type: DBNet
+        block_num: [8, 8]
+        down_scale: 4
+    pretrain: weights/IRN/IRN_x4.pth
+    dataset_class: ImageDataset
+    chopable: true
+    model_scale: 4
+    saveimg_function: sdr
+
+IRN_x2:
+    class: InvRescaleNet
+    modelargs: 
+        channel_in: 3
+        channel_out: 3
+        subnet_type: DBNet
+        block_num: [8]
+        down_scale: 2
+    pretrain: weights/IRN/IRN_x2.pth
+    dataset_class: ImageDataset
+    chopable: true
+    model_scale: 2
+    saveimg_function: sdr
+
+IRNp_x4_down:
+    class: InvRescaleNet_HaarDown
+    modelargs: 
+        channel_in: 3
+        channel_out: 3
+        subnet_type: DBNet
+        block_num: [8, 8]
+        down_scale: 4
+    #pretrain: weights/IRN/IRN+_x4.pth
+    pretrain: ~/workspace/Invertible-Image-Rescaling/experiments/01_IRN_DB_x4_genshin/models/390000_G.pth
+    dataset_class: ImageDataset
+    chopable: true
+    model_scale: 4
+    saveimg_function: sdr
+
+
+IRNp_x4_full:
+    class: InvRescaleNet_full
+    modelargs: 
+        channel_in: 3
+        channel_out: 3
+        subnet_type: DBNet
+        block_num: [8, 8]
+        down_scale: 4
+    #pretrain: weights/IRN/IRN+_x4.pth
+    pretrain: ~/workspace/Invertible-Image-Rescaling/experiments/01_IRN_DB_x4_genshin/models/390000_G.pth
+    dataset_class: ImageDataset
+    chopable: true
+    model_scale: 4
+    saveimg_function: sdr
+

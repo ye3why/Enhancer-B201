@@ -1,10 +1,12 @@
 import numpy as np
 import torch
 import math
+import os.path as osp
 from collections import OrderedDict
 
 
 def loadmodel(sr_model, sr_pretrain, NGPUs):
+    sr_pretrain = osp.expanduser(sr_pretrain)
     weights = torch.load(sr_pretrain)
     if 'params_ema' in weights.keys():
         weights = weights['params_ema']
