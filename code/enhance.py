@@ -53,6 +53,7 @@ def parseargs():
     parser.add_argument('--fps', type=int, help='Output FPS.')
     parser.add_argument('--video_bitrate', type=str, help='Output bitrate.')
     parser.add_argument('--ffmpeg_cmd', type=str, help='ffmpeg command path.')
+    parser.add_argument('--saveimg_function', type=str, default='', help='function to save img. default: use specified in models setting.')
 
     # others
     parser.add_argument('--models_conf', type=str, help='Path to models config Yaml file.')

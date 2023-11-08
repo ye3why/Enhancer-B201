@@ -9,6 +9,15 @@ from pathlib import Path
 from registry import DATASET_REGISTRY
 import utils
 
+def toTensor(img):
+    transformer = torchvision.transforms.ToTensor()
+    if img.dtype == 'uint8':
+        return transformer(img)
+    elif img.dtype == 'uint16':
+        return transformer(img.astype('float32') / 65535)
+    else:
+        raise Exception('Not supported img type')
+
 @DATASET_REGISTRY.register()
 class ImageDataset(data.Dataset):
     def __init__(self, video_dir, n_frames):
@@ -28,7 +37,8 @@ class ImageDataset(data.Dataset):
         # lr = misc.imread(img_path)
         lr = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR|cv2.IMREAD_ANYDEPTH)
         lr = lr[:, :, [2, 1, 0]]
-        lr = self.transformer(lr) # [0.0, 1.0]
+        # lr = self.transformer(lr) # [0.0, 1.0]
+        lr = toTensor(lr) # [0.0, 1.0]
         # return lr, filename
         return {'inp': lr, 'filename': filename, 'dirname': self.video_dir.name}
 
@@ -63,7 +73,8 @@ class VideoDataset(data.Dataset):
             # temp = misc.imread(img_path)
             temp = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR|cv2.IMREAD_ANYDEPTH)
             temp = temp[:, :, [2, 1, 0]]
-            temp = self.transformer(temp) # [0.0, 1.0]
+            # temp = self.transformer(temp) # [0.0, 1.0]
+            temp = toTensor(temp) # [0.0, 1.0]
             lrs.append(temp)
         lrs = torch.stack(lrs, dim=0)
 
@@ -110,7 +121,8 @@ class FrameInterpDataset(VideoDataset):
             # temp = misc.imread(img_path)
             temp = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR|cv2.IMREAD_ANYDEPTH)
             temp = temp[:, :, [2, 1, 0]]
-            temp = self.transformer(temp) # [0.0, 1.0]
+            # temp = self.transformer(temp) # [0.0, 1.0]
+            temp = toTensor(temp) # [0.0, 1.0]
             lrs.append(temp)
         lrs = torch.stack(lrs, dim=0)
 
@@ -139,7 +151,8 @@ class VideoMinMoutDataset(data.Dataset):
             # temp = misc.imread(img_path)
             temp = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR|cv2.IMREAD_ANYDEPTH)
             temp = temp[:, :, [2, 1, 0]]
-            temp = self.transformer(temp) # [0.0, 1.0]
+            # temp = self.transformer(temp) # [0.0, 1.0]
+            temp = toTensor(temp) # [0.0, 1.0]
             lrs.append(temp)
         lrs = torch.stack(lrs, dim=0)
 

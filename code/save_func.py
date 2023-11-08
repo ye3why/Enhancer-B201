@@ -25,6 +25,14 @@ def saveimg_hlg(img, path, datainfo=None):
     cv2.imwrite(str(path), img)
 
 
+@SAVEIMG_REGISTRY.register('int16')
+def saveimg_int16(img, path, datainfo=None):
+    img = img.cpu().detach().clamp_(0,1).numpy().transpose((1, 2, 0))
+    img = (img * 65535.0).astype(np.uint16)
+    img = img[:,:,::-1].copy()
+    cv2.imwrite(str(path), img)
+
+
 @SAVEIMG_REGISTRY.register('colorenhance')
 def saveimg_colorenhance(img, path, datainfo=None):
     def tensor_to_np(tensor):

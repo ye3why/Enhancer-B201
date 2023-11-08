@@ -59,7 +59,10 @@ def model_forward(model_conf, input_tmpdir, save_tmpdir, opt):
     model = model_conf['net']
     testset = model_conf['dataset'](input_tmpdir.getPath(), n_frames=model_conf['nframes'])
     dataloader = DataLoader(testset, batch_size=opt['batchsize'], shuffle=False, num_workers=4)
-    saveimg_function = SAVEIMG_REGISTRY.get(model_conf['saveimg_function'])
+    if not opt['saveimg_function']:
+        saveimg_function = SAVEIMG_REGISTRY.get(model_conf['saveimg_function'])
+    else:
+        saveimg_function = SAVEIMG_REGISTRY.get(opt['saveimg_function'])
     que = queue.Queue(maxsize=100)
     imgsavers = [utils.ImgSaver(saveimg_function, que, f'Saver_{i}') for i in range(opt['num_imgsavers'])]
     for saver in imgsavers:

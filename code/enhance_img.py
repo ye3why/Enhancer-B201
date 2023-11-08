@@ -39,6 +39,7 @@ def parseargs():
     parser.add_argument('--load_weights', type=str, required=False, default=None, help='load specific model weights. Only support single model')
     parser.add_argument('--modelargs', type=yaml.safe_load, required=False, default=None, help='extra model args to instantialize model.Only support single model')
     parser.add_argument('-l', '--list', action='store_true', help='List available models.')
+    parser.add_argument('--saveimg_function', type=str, default='', help='function to save img. default: use specified in models setting.')
 
     args = parser.parse_args()
 

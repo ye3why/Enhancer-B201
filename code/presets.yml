@@ -8,6 +8,8 @@ models_conf: null
 batch_size_per_gpu: 1
 num_imgsavers: 10
 
+saveimg_function: ~
+
 chop: false
 chop_threshold: 160000
 
