@@ -25,6 +25,8 @@ debug: false
  # [auto, hls, segment] hevc,h264: hls, others: segment
 segment_method: auto
 
+saveimg_function: ~ # int16 if input more than 8bit
+
 # models used to process input in sequence
 # definitions in models.yml
 # function of these model, see README.md
@@ -35,21 +37,44 @@ models:
     #- Descratch_bw
     #- Descratch_white
     #- BasicVSR_ds_x2
-    #- VRTx4_bd
-    #- RealESRGANx2
-    #- RealESRGANx4
-    #- RealBasicVSR_x4
     #- ChromaticCorrect
     #- DeInterlace
     #- MFDIN_2X
     #- MFDIN_2P
     #- MFDIN_2X2P
-    #- EDSRx2
     #- CAR
     #- SRx2
     #- SRx3
     #- SRx4
+    #- SRx2img
+    #- COLOR
     #- HLG
+    
+    #- Bicubic1/2
+    #- Bicubic1/4
+    
+    #- EDSRx2
+    #- ESRGANx4
+    #- RealESRGANx2
+    #- RealESRGANx4
+    #- RealBasicVSR_x4
+    #- VRTx4_bd
+    #- HAT_Real_x4
+    #- HAT_x4
+    #- HAT_L_x4
+    #- HAT_S_x4
+    #- HAT_x3
+    #- HAT_L_x3
+    #- HAT_S_x3
+    #- HAT_x2
+    #- HAT_L_x2
+    #- HAT_S_x2
+    #- AnimeSRv1x4
+    #- AnimeSRv2x4
+    #- AnimeSRx4
+    #- AnimeSRx4_6b
+
+
 
 # video specifications
 output_ext: .mov
@@ -60,13 +85,13 @@ video_spec:
     pix_fmt: yuv420p
 
     # hlg
-    #bitrate: 50M
+    #video_bitrate: 50M
     #vcodec: libx265
     #pix_fmt: yuv420p10le
     #x265-params: 'colormatrix=bt2020nc:transfer=arib-std-b67:colorprim=bt2020:pools=36'
 
     # prores 4444
-    #bitrate: 50M
+    #video_bitrate: 50M
     #vcodec: prores_ks
     #colorspace: bt709
     #pix_fmt: yuv444p10le
