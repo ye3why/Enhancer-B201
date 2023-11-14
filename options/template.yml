@@ -9,6 +9,8 @@ ffmpeg_cmd: ffmpeg
 num_imgsavers: 10
 batch_size_per_gpu: 1
 
+saveimg_function: ~ # int16 if input more than 8bit
+
 chop: false
 chop_threshold: 160000
 
@@ -25,11 +27,11 @@ debug: false
  # [auto, hls, segment] hevc,h264: hls, others: segment
 segment_method: auto
 
-saveimg_function: ~ # int16 if input more than 8bit
 
 # models used to process input in sequence
 # definitions in models.yml
 # function of these model, see README.md
+#models: {} # {} if not be used
 models:
     #- Denoise_low
     #- Denoise_medium
@@ -98,7 +100,8 @@ video_spec:
     #'profile:v': 4
 
 # ffmpeg video filters
-vfs:
+vfs: {} # {} if not be used
+#vfs:
     #scale: '3840x2160'
     #hqdn3d:
     #unsharp: '3:3:1'
