@@ -54,6 +54,7 @@ def parseargs():
     parser.add_argument('--video_bitrate', type=str, help='Output bitrate.')
     parser.add_argument('--ffmpeg_cmd', type=str, help='ffmpeg command path.')
     parser.add_argument('--saveimg_function', type=str, default='', help='function to save img. default: use specified in models setting.')
+    parser.add_argument('--segment_method', type=str, default='', help='clip segmentation method.')
 
     # others
     parser.add_argument('--models_conf', type=str, help='Path to models config Yaml file.')
@@ -61,6 +62,10 @@ def parseargs():
     parser.add_argument('--debug', action='store_true', help='Debug mode.')
     parser.add_argument('--keep_png_results', action='store_true', help='Keep image results.')
     parser.add_argument('--keep_clip_results', action='store_true', help='Keep clip results.')
+
+    parser.add_argument('--rawvideo', action='store_true', help='Input is rawvideo.')
+    parser.add_argument('--input_res', type=str, help='Input resolution if YUV input.')
+    parser.add_argument('--input_pix_fmt', type=str, help='Input Pixel format if YUV input.')
 
     args = parser.parse_args()
 
@@ -158,7 +163,20 @@ def process_video(video_path, opt, prepared_models):
 
     split_tmpdir = utils.getTempdir(opt['tempdir_type'], opt)
     try:
-        if opt['segment_method'] == 'hls' or \
+        if opt['rawvideo']:
+            if video_path.suffix == '.yuv':
+                ffmpeg_i = ffmpeg.input(str(video_path), vsync=0, s=opt['input_res'], pix_fmt=opt['input_pix_fmt'])
+            else:
+                ffmpeg_i = ffmpeg.input(str(video_path), vsync=0)
+            (
+                ffmpeg
+                # .input(str(video_path), vsync=0, s=opt['input_res'], pix_fmt=opt['input_pix_fmt'])
+                .output(ffmpeg_i, str(split_tmpdir.getPath().joinpath('{}_{}'.format(video_path.stem, '.y4m'))),
+                        map='v:0', pix_fmt='yuv444p', segment_time='00:00:15',
+                        f='yuv4mpegpipe')
+                .run(quiet=opt['ffmpeg_quiet'], cmd=opt['ffmpeg_cmd'])
+            )
+        elif opt['segment_method'] == 'hls' or \
         (opt['segment_method'] == 'auto' and utils.get_codec(video_path) in ['hevc', 'h264']):
             (
                 ffmpeg
@@ -179,7 +197,7 @@ def process_video(video_path, opt, prepared_models):
     except ffmpeg.Error as e:
         print(e.stderr.decode())
         raise e
-    clips = sorted(set.union(set(split_tmpdir.getPath().glob('*.ts')), set(split_tmpdir.getPath().glob('*.mov'))))
+    clips = sorted(set.union(set(split_tmpdir.getPath().glob('*.y4m')), set(split_tmpdir.getPath().glob('*.ts')), set(split_tmpdir.getPath().glob('*.mov'))))
 
     print('Split dir: {}, {} clips'.format(split_tmpdir, len(clips)))
     print('Split res dir: {}'.format(split_res_dir))
@@ -240,12 +258,20 @@ def process_video(video_path, opt, prepared_models):
             raise e
     else:
         try:
-            (
-                ffmpeg
-                .input(str(split_list), f='concat', safe=0)
-                .output(str(opt['output_dir'].joinpath(output_name)), c='copy')
-                .run(quiet=opt['ffmpeg_quiet'], cmd=opt['ffmpeg_cmd'])
-            )
+            if opt['output_ext'] == '.y4m':
+                (
+                    ffmpeg
+                    .input(str(split_list), f='concat', safe=0)
+                    .output(str(opt['output_dir'].joinpath(output_name)))
+                    .run(quiet=opt['ffmpeg_quiet'], cmd=opt['ffmpeg_cmd'])
+                )
+            else:
+                (
+                    ffmpeg
+                    .input(str(split_list), f='concat', safe=0)
+                    .output(str(opt['output_dir'].joinpath(output_name)), c='copy')
+                    .run(quiet=opt['ffmpeg_quiet'], cmd=opt['ffmpeg_cmd'])
+                )
         except ffmpeg.Error as e:
             print(e.stderr.decode())
             raise e

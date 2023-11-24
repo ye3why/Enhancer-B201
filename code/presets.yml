@@ -30,6 +30,11 @@ models: {}
 total_frame_scale: 1
 total_model_scale: 1
 
+# yuv or y4m input
+rawvideo: false
+input_res: ~ # if yuv input
+input_pix_fmt: ~ # if yuv input
+
 
 # ffmpeg video filters
 vfs: {}
@@ -68,4 +73,9 @@ presets:
         colorspace: bt709
         pix_fmt: yuv444p10le
         'profile:v': 4
+
+    y4m:
+        pix_fmt: yuv420p
+        f: yuv4mpegpipe
+        
 

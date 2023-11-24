@@ -13,9 +13,11 @@ def get_codec(video):
             return s['codec_name']
 
 def get_ffmpeg_args(video):
-    info = ffmpeg.probe(str(video))
     res = {}
     res['has_audio'] = False
+    if video.suffix == '.yuv':
+        return res
+    info = ffmpeg.probe(str(video))
     for s in info['streams']:
         if s['codec_type'] == 'video':
             res['r'] = s['r_frame_rate']
